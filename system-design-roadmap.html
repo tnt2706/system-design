@@ -188,6 +188,7 @@
     <h3>Mục lục</h3>
     <ol>
       <li><a href="#assess">Tự đánh giá &amp; cách dùng</a></li>
+      <li><a href="#execplan">Lộ trình thực thi &amp; rubric</a></li>
       <li><a href="#p1">Nền tảng System Design</a></li>
       <li><a href="#p2">Data ở quy mô lớn</a></li>
       <li><a href="#p3">Communication &amp; Distributed</a></li>
@@ -200,6 +201,7 @@
       <li><a href="#worked">Bài mẫu: Design Twitter</a></li>
       <li><a href="#gallery">13 bài mẫu + sơ đồ</a></li>
       <li><a href="#mq">⭐ RabbitMQ vs Kafka (chuyên sâu)</a></li>
+      <li><a href="#db">⭐ Database chuyên sâu (Cassandra, ClickHouse…)</a></li>
       <li><a href="#monitoring">Monitoring &amp; ngưỡng cảnh báo</a></li>
       <li><a href="#cheatsheet">Cheat-sheet tra nhanh</a></li>
       <li><a href="#selftest">Tự kiểm tra (active recall)</a></li>
@@ -231,6 +233,60 @@
           <h4>Cách học hiệu quả nhất với tài liệu này</h4>
           <p style="font-size:14.5px;margin:0">Mỗi bài đọc xong hãy <b>tự diễn đạt lại bằng lời của bạn</b> (kỹ thuật Feynman) và <b>liên hệ với hệ thống đang làm</b>. Đọc hiểu là chưa đủ — đến mỗi cuối giai đoạn có một <b>Output thực tế</b> phải làm để biến lý thuyết thành kỹ năng. Architect = người ra quyết định trong ràng buộc và giải thích được <i>tại sao</i>.</p>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ EXECUTION PLAN ============ -->
+  <section id="execplan">
+    <div class="section-card">
+      <div class="phase-head"><span class="tag">Cách dùng · quan trọng</span>
+        <h2>🗓️ Lộ trình thực thi &amp; thước đo "đã sẵn sàng"</h2>
+        <p class="sub">Tài liệu này lớn — đừng đọc tuyến tính từ đầu tới cuối. Đây là nhịp học giúp bạn vừa <b>hiểu</b> vừa <b>biến thành kỹ năng</b>, và cách biết mình đã đủ trình.</p></div>
+      <div class="phase-body cheat">
+        <div class="callout"><h4>Nguyên tắc số 1</h4><p style="font-size:14.5px;margin:0">Kiến thức System Design <b>chỉ thành kỹ năng qua thực hành</b>. Tỉ lệ vàng: <b>30% đọc · 50% xây/vẽ · 20% trình bày &amp; nhận phản hồi</b>. Đọc xong một chủ đề mà không áp vào dự án hay không tự vẽ lại → 2 tuần sau quên sạch.</p></div>
+
+        <h4 class="mon-h4">Nhịp tuần (mẫu, ~10–12 giờ/tuần)</h4>
+        <div class="tbl-scroll"><table class="cheat-tbl">
+          <tr><th>Hoạt động</th><th>Thời lượng</th><th>Làm gì cụ thể</th></tr>
+          <tr><td><b>Đọc lý thuyết</b></td><td>~3h</td><td>2–3 bài học trong giai đoạn hiện tại. Đọc xong <b>tự diễn đạt lại bằng lời mình</b> (Feynman) + tự vẽ lại sơ đồ từ trí nhớ.</td></tr>
+          <tr><td><b>Xây dự án</b></td><td>~5h</td><td>Tiến một phần của dự án tương ứng giai đoạn. Quan trọng: <b>tự ép hệ thống gãy</b> (bắn tải, tắt node) rồi ghi lại bài học.</td></tr>
+          <tr><td><b>Mổ xẻ hệ thống thật</b></td><td>~2h</td><td>1 case (trong 14 bài mẫu hoặc engineering blog). Gấp lại → tự thiết kế lại → so sánh.</td></tr>
+          <tr><td><b>Tự kiểm tra</b></td><td>~1h</td><td>Làm phần Self-test + ôn lại chủ đề tuần trước (spaced repetition).</td></tr>
+        </table></div>
+
+        <h4 class="mon-h4">Lịch tổng theo giai đoạn (9–12 tháng)</h4>
+        <div class="tbl-scroll"><table class="cheat-tbl">
+          <tr><th>Tháng</th><th>Học</th><th>Dự án song song</th><th>Mốc đạt được</th></tr>
+          <tr><td>1–2</td><td>GĐ1 nền tảng</td><td>#1 URL Shortener, #2 Rate Limiter</td><td>Estimation thành thạo, hiểu CAP/scale</td></tr>
+          <tr><td>2–4</td><td>GĐ2 Data</td><td>#3 Mini KV Store</td><td>Chọn DB có lý do, hiểu shard/replication</td></tr>
+          <tr><td>4–6</td><td>GĐ3 Distributed</td><td>#4 Chat, #5 Notification</td><td>Saga, idempotency, queue/Kafka vững</td></tr>
+          <tr><td>6–8</td><td>GĐ4 Architecture</td><td>#6 Payment (Saga)</td><td>Viết được RFC + C4 + bảng trade-off</td></tr>
+          <tr><td>8–10</td><td>GĐ5 Reliability/Sec</td><td>#7 News Feed, #8 Capstone</td><td>Thiết kế resilience + observability</td></tr>
+          <tr><td>10–12</td><td>GĐ6 + Lãnh đạo</td><td>Hoàn thiện portfolio, mock interview</td><td>Trình bày &amp; bảo vệ thiết kế tự tin</td></tr>
+        </table></div>
+
+        <h4 class="mon-h4">Luyện "trình bày" — kỹ năng hay bị bỏ quên</h4>
+        <ul style="margin-left:18px;font-size:14px">
+          <li><b>Mock interview System Design</b> mỗi 2 tuần: chọn 1 đề, <b>timebox 45 phút</b>, <b>nói to thành lời</b> trong lúc vẽ (giám khảo chấm cách bạn lập luận, không phải đáp án).</li>
+          <li>Quay màn hình lại xem mình có: hỏi rõ NFR trước? làm estimation? nêu trade-off ở bước cuối? Đây là 3 lỗi rớt phổ biến nhất.</li>
+          <li>Tìm người review (đồng nghiệp/mentor) — phản hồi từ người khác đáng giá gấp nhiều lần tự đọc.</li>
+        </ul>
+
+        <h4 class="mon-h4">✅ Rubric: khi nào bạn ĐÃ SẴN SÀNG cho vai trò Architect</h4>
+        <p style="font-size:14px">Không phải "đọc hết tài liệu" mà là làm được những điều sau một cách <b>tự nhiên</b>:</p>
+        <ul style="margin-left:18px;font-size:14px">
+          <li>Nhận một bài toán mơ hồ → tự bóc tách thành <b>NFR rõ ràng</b> bằng câu hỏi đúng, không vội vẽ.</li>
+          <li>Làm <b>estimation</b> (QPS/storage) trong đầu để biết hệ read-heavy hay write-heavy, cần cache/shard không.</li>
+          <li>Với mỗi quyết định, nêu được <b>2–3 phương án + trade-off</b> và bảo vệ lựa chọn bằng ràng buộc thực tế.</li>
+          <li>Vẽ <b>C4</b> &amp; viết <b>ADR/RFC</b> mà người khác đọc hiểu &amp; đồng thuận.</li>
+          <li>Thiết kế <b>cho lúc hỏng</b> (failure mode, resilience) và <b>quan sát được</b> (observability) ngay từ đầu, không vá sau.</li>
+          <li>Giải thích quyết định kỹ thuật bằng <b>ngôn ngữ business</b> (chi phí, rủi ro, time-to-market) cho người không chuyên.</li>
+          <li>Chủ động <b>chống over-engineering</b> — chọn giải pháp đơn giản nhất đủ dùng, biết khi nào KHÔNG nên microservices/Kafka/CQRS.</li>
+          <li>Có <b>portfolio</b>: 6+ case study + RFC thật + sơ đồ, đủ để trình bày khi phỏng vấn hoặc đề xuất thăng tiến.</li>
+          <li>Dẫn được một <b>design review</b>, đặt câu hỏi sắc, và giúp người khác cải thiện thiết kế của họ.</li>
+        </ul>
+        <div class="key"><b>Mục tiêu:</b> tick được <b>7/9</b> một cách tự tin (không phải "biết khái niệm" mà "làm được") → bạn đã đủ trình để bước vào vai trò Architect và học tiếp trong thực chiến.</div>
       </div>
     </div>
   </section>
@@ -774,6 +830,34 @@
           <div class="done-row"><input type="checkbox" id="p2-lock"><label for="p2-lock">Đã hiểu bài này</label></div>
         </div></details>
 
+        <details class="lesson"><summary><span class="dot"></span>Schema Migration không downtime (Expand–Contract) <span class="hook">· đổi DB khi đang chạy</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vấn đề</h5>
+          <p>DB đang phục vụ khách 24/7, cần đổi schema (đổi tên cột, tách bảng, đổi kiểu) mà <b>không downtime, không mất dữ liệu, rollback được</b>. Đổi trực tiếp (rename cột) sẽ làm code cũ đang chạy hỏng ngay. Đây là kỹ năng vận hành Architect bắt buộc nắm.</p>
+          <h5>Expand–Contract (Parallel Change) — 3 pha</h5>
+          <div class="diagram"><svg viewBox="0 0 600 165" width="600" height="165" role="img" aria-label="Expand contract migration">
+            <defs><marker id="ec1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text-dim)"/></marker></defs>
+            <g font-size="9" text-anchor="middle" fill="var(--text)">
+              <rect x="20" y="40" width="160" height="80" rx="8" fill="rgba(126,231,135,.08)" stroke="var(--accent-2)"/><text x="100" y="30" font-size="10" font-weight="700" fill="var(--accent-2)">① EXPAND</text>
+              <text x="100" y="62" font-size="8.5">thêm cột/bảng MỚI</text><text x="100" y="78" font-size="8.5">(giữ cả cũ)</text><text x="100" y="98" font-size="8" fill="var(--text-dim)">ghi vào CẢ HAI</text>
+              <rect x="220" y="40" width="160" height="80" rx="8" fill="rgba(240,180,41,.08)" stroke="var(--warn)"/><text x="300" y="30" font-size="10" font-weight="700" fill="var(--warn)">② MIGRATE</text>
+              <text x="300" y="62" font-size="8.5">backfill dữ liệu cũ→mới</text><text x="300" y="78" font-size="8.5">đổi code đọc sang mới</text><text x="300" y="98" font-size="8" fill="var(--text-dim)">kiểm tra khớp</text>
+              <rect x="420" y="40" width="160" height="80" rx="8" fill="rgba(88,166,255,.08)" stroke="var(--accent)"/><text x="500" y="30" font-size="10" font-weight="700" fill="var(--accent)">③ CONTRACT</text>
+              <text x="500" y="62" font-size="8.5">ngừng ghi cũ</text><text x="500" y="78" font-size="8.5">xoá cột/bảng cũ</text><text x="500" y="98" font-size="8" fill="var(--text-dim)">hoàn tất</text>
+            </g>
+            <g stroke="var(--text-dim)" stroke-width="1.4" fill="none" marker-end="url(#ec1)"><path d="M180 80 L218 80"/><path d="M380 80 L418 80"/></g>
+            <text x="300" y="145" text-anchor="middle" font-size="8.5" fill="var(--text-dim)">Mỗi pha tương thích ngược → deploy &amp; rollback an toàn ở từng bước</text>
+          </svg><div class="cap">Expand: thêm cấu trúc mới, ghi cả cũ lẫn mới. Migrate: backfill dữ liệu cũ + chuyển code đọc sang mới. Contract: bỏ cái cũ. Mỗi pha tương thích ngược nên không bao giờ downtime.</div></div>
+          <h5>Ví dụ: đổi tên cột <code>name</code> → <code>full_name</code></h5>
+          <ul>
+            <li><b>Expand:</b> thêm cột <code>full_name</code>; app ghi vào cả hai.</li>
+            <li><b>Migrate:</b> backfill <code>full_name</code> từ <code>name</code> cho dữ liệu cũ; chuyển app đọc <code>full_name</code>.</li>
+            <li><b>Contract:</b> ngừng ghi <code>name</code>; sau khi yên tâm → drop cột <code>name</code>.</li>
+          </ul>
+          <div class="key"><b>Nguyên tắc:</b> mọi bước phải <b>tương thích ngược</b> để code phiên bản cũ &amp; mới chạy song song trong lúc rolling deploy. Không bao giờ đổi phá vỡ trong một bước. Đây cũng chính là tư duy của Strangler Fig (GĐ6) áp cho dữ liệu.</div>
+          <div class="done-row"><input type="checkbox" id="p2-mig"><label for="p2-mig">Đã hiểu bài này</label></div>
+        </div></details>
+
         <div class="out"><strong>📦 Output GĐ 2:</strong> Viết "Data Architecture Decision" cho một sản phẩm giả định (e-commerce hoặc social feed): chọn DB &amp; lý do, mô tả schema/partition key, chiến lược cache + replication, cách xử lý cache invalidation.</div>
       </div>
     </div>
@@ -1156,6 +1240,29 @@
           <div class="done-row"><input type="checkbox" id="p3-api"><label for="p3-api">Đã hiểu bài này</label></div>
         </div></details>
 
+        <details class="lesson"><summary><span class="dot"></span>Time, Clocks &amp; Ordering <span class="hook">· "lúc nào" trong hệ phân tán rất khó</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vấn đề: không thể tin đồng hồ tường (wall clock)</h5>
+          <p>Mỗi máy có đồng hồ riêng, lệch nhau (clock skew) dù có NTP. Nên <b>không thể dùng timestamp để xác định thứ tự sự kiện</b> giữa các máy: sự kiện X trên máy A "trước" Y trên máy B theo timestamp, nhưng thực tế có thể ngược lại. Điều này gây bug "last write wins" sai, log lệch thứ tự, dữ liệu ghi đè nhầm.</p>
+          <h5>Các loại "thời gian"</h5>
+          <ul>
+            <li><b>Physical / wall clock:</b> thời gian thực (UTC). Dùng hiển thị, nhưng <b>không đáng tin để sắp thứ tự</b> nhân quả.</li>
+            <li><b>Logical clock (Lamport):</b> một bộ đếm tăng dần theo sự kiện &amp; message. Cho biết "A xảy ra trước B" (quan hệ nhân quả) mà không cần đồng hồ đồng bộ. Nhưng không cho biết 2 sự kiện độc lập cái nào trước.</li>
+            <li><b>Vector clock:</b> mỗi node giữ một vector đếm → phát hiện được sự kiện nào <b>nhân quả</b>, sự kiện nào <b>đồng thời (concurrent → conflict)</b>. Dùng trong Dynamo/Cassandra để phát hiện xung đột ghi.</li>
+            <li><b>Hybrid Logical Clock (HLC) / TrueTime:</b> kết hợp physical + logical. Google Spanner dùng <b>TrueTime</b> (đồng hồ nguyên tử + GPS, cho biết khoảng sai số) để có thứ tự toàn cục ở quy mô toàn cầu.</li>
+          </ul>
+          <div class="diagram"><svg viewBox="0 0 600 130" width="600" height="130" role="img" aria-label="Clock skew problem">
+            <defs><marker id="cl1" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="var(--pink)"/></marker></defs>
+            <g font-size="9.5" fill="var(--text)">
+              <text x="20" y="30">Máy A (đồng hồ nhanh 50ms):</text><line x1="220" y1="26" x2="560" y2="26" stroke="var(--border)"/><circle cx="320" cy="26" r="5" fill="var(--accent)"/><text x="320" y="18" font-size="8" text-anchor="middle">ghi X @ 10:00.10</text>
+              <text x="20" y="80">Máy B (đúng giờ):</text><line x1="220" y1="76" x2="560" y2="76" stroke="var(--border)"/><circle cx="420" cy="76" r="5" fill="var(--accent-2)"/><text x="420" y="95" font-size="8" text-anchor="middle">ghi Y @ 10:00.08</text>
+            </g>
+            <text x="300" y="118" text-anchor="middle" font-size="8.5" fill="var(--pink)">Theo timestamp: Y(.08) trước X(.10). Thực tế: X xảy ra TRƯỚC. → "last write wins" chọn sai!</text>
+          </svg><div class="cap">Đồng hồ lệch khiến timestamp đánh lừa thứ tự thật. Vì vậy hệ phân tán dùng logical/vector clock cho nhân quả, không tin wall clock để quyết định "ai mới hơn".</div></div>
+          <div class="key"><b>Ý nghĩa thực tế:</b> Đừng dùng <code>updated_at</code> timestamp để giải xung đột ghi giữa các node. Dùng version/vector clock, hoặc tập trung hoá việc cấp thứ tự (1 leader, hoặc sequencer như Snowflake ID có timestamp + node id). Hiểu điều này giúp tránh bug "mất dữ liệu ghi đè" tinh vi trong hệ phân tán.</div>
+          <div class="done-row"><input type="checkbox" id="p3-clock"><label for="p3-clock">Đã hiểu bài này</label></div>
+        </div></details>
+
         <div class="out"><strong>📦 Output GĐ 3:</strong> Vẽ sequence diagram luồng thanh toán end-to-end có retry, idempotency key, và compensation (Saga) khi một bước thất bại.</div>
       </div>
     </div>
@@ -1332,6 +1439,57 @@
             <g stroke="var(--purple)" stroke-width="1.3" stroke-dasharray="4" fill="none" marker-end="url(#gw1)"><path d="M370 48 L428 78"/><path d="M370 126 L428 96"/><path d="M330 64 L330 110"/></g>
           </svg><div class="cap">API Gateway = cổng vào cho client (north-south): auth, rate limit, routing. Service Mesh = lo giao thông giữa các service (east-west): mTLS, retry, circuit breaker qua sidecar, không cần sửa code service.</div></div>
           <div class="done-row"><input type="checkbox" id="p4-6"><label for="p4-6">Đã hiểu bài này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>Multi-tenancy — phục vụ nhiều khách trên một hệ <span class="hook">· cốt lõi của SaaS</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Là gì &amp; vì sao quan trọng</h5>
+          <p>SaaS phục vụ nhiều khách hàng (tenant) trên cùng hạ tầng. Câu hỏi kiến trúc lớn: <b>cô lập dữ liệu giữa các tenant tới mức nào?</b> Đây là quyết định khó sửa, ảnh hưởng bảo mật, chi phí, vận hành.</p>
+          <div class="diagram"><svg viewBox="0 0 600 175" width="600" height="175" role="img" aria-label="Multi-tenancy isolation models">
+            <g font-size="9" text-anchor="middle" fill="var(--text)">
+              <text x="100" y="14" font-size="10" font-weight="700" fill="var(--accent-2)">Silo: DB riêng/tenant</text>
+              <rect x="40" y="26" width="50" height="26" rx="4" fill="var(--bg-soft)" stroke="var(--accent-2)"/><text x="65" y="43">DB-A</text>
+              <rect x="100" y="26" width="50" height="26" rx="4" fill="var(--bg-soft)" stroke="var(--accent-2)"/><text x="125" y="43">DB-B</text>
+              <text x="100" y="70" font-size="7.5" fill="var(--text-dim)">cô lập mạnh nhất · đắt · khó scale số tenant</text>
+              <text x="300" y="14" font-size="10" font-weight="700" fill="var(--accent)">Bridge: schema riêng</text>
+              <rect x="240" y="26" width="120" height="26" rx="4" fill="var(--bg-soft)" stroke="var(--accent)"/><text x="300" y="43">1 DB · schema A | B | C</text>
+              <text x="300" y="70" font-size="7.5" fill="var(--text-dim)">cân bằng · vừa cô lập vừa tiết kiệm</text>
+              <text x="500" y="14" font-size="10" font-weight="700" fill="var(--warn)">Pool: chung bảng</text>
+              <rect x="440" y="26" width="120" height="26" rx="4" fill="var(--bg-soft)" stroke="var(--warn)"/><text x="500" y="43">1 bảng + cột tenant_id</text>
+              <text x="500" y="70" font-size="7.5" fill="var(--text-dim)">rẻ nhất · scale tốt · rủi ro rò rỉ nếu quên filter</text>
+            </g>
+            <line x1="20" y1="88" x2="580" y2="88" stroke="var(--border)"/>
+            <text x="300" y="108" text-anchor="middle" font-size="9.5" fill="var(--text)">Đánh đổi: cô lập/bảo mật ↔ chi phí/đơn giản vận hành</text>
+            <text x="300" y="130" text-anchor="middle" font-size="9" fill="var(--text-dim)">← Silo (mạnh, đắt)            Bridge            Pool (rẻ, scale) →</text>
+            <rect x="60" y="140" width="480" height="10" rx="5" fill="url(#mtgrad)"/>
+            <defs><linearGradient id="mtgrad"><stop offset="0" stop-color="var(--accent-2)"/><stop offset="1" stop-color="var(--warn)"/></linearGradient></defs>
+          </svg><div class="cap">3 mô hình: Silo (DB riêng mỗi tenant — cô lập mạnh, đắt), Bridge (schema riêng — cân bằng), Pool (chung bảng + tenant_id — rẻ, scale tốt nhưng phải tuyệt đối không quên filter theo tenant_id).</div></div>
+          <h5>Quyết định &amp; cạm bẫy</h5>
+          <ul>
+            <li><b>Pool model</b> (shared, tenant_id) phổ biến nhất vì rẻ &amp; scale — nhưng <b>rủi ro lớn nhất: quên filter <code>WHERE tenant_id=?</code></b> → rò rỉ dữ liệu khách này sang khách khác (sự cố bảo mật nghiêm trọng). Giải: ép ở tầng ORM/middleware, dùng Row-Level Security của Postgres.</li>
+            <li><b>Silo</b> cho khách enterprise yêu cầu cô lập/tuân thủ cao; <b>Pool</b> cho khách nhỏ số lượng lớn. Nhiều SaaS dùng <b>lai</b>: pool cho đa số, silo cho khách lớn.</li>
+            <li><b>Noisy neighbor:</b> một tenant ngốn tài nguyên ảnh hưởng người khác → cần rate limit/quota per-tenant.</li>
+          </ul>
+          <div class="done-row"><input type="checkbox" id="p4-7"><label for="p4-7">Đã hiểu bài này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>Anti-patterns &amp; "code smell" kiến trúc <span class="hook">· những lỗi phải tránh</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <p>Gom lại các sai lầm kiến trúc phổ biến nhất — nhận diện được chúng là dấu hiệu tư duy chín:</p>
+          <div class="tbl-scroll"><table class="cheat-tbl">
+            <tr><th>Anti-pattern</th><th>Triệu chứng</th><th>Cách tránh</th></tr>
+            <tr><td><b>Distributed Monolith</b></td><td>Microservices nhưng đổi 1 cái phải deploy nhiều cái; service gọi nhau chằng chịt đồng bộ</td><td>Chia theo bounded context (DDD); service tự chủ dữ liệu; ưu tiên async</td></tr>
+            <tr><td><b>Chatty services</b></td><td>1 request user → hàng chục lời gọi inter-service → latency cộng dồn</td><td>Gộp dữ liệu, BFF, giảm số hop, cache</td></tr>
+            <tr><td><b>God service / God table</b></td><td>Một service/bảng ôm hết, ai cũng phụ thuộc → nghẽn &amp; SPOF</td><td>Tách trách nhiệm theo domain</td></tr>
+            <tr><td><b>Shared database</b></td><td>Nhiều service dùng chung 1 DB → coupling ngầm, không ai dám đổi schema</td><td>Mỗi service sở hữu dữ liệu riêng; chia sẻ qua API/event</td></tr>
+            <tr><td><b>Dual write</b></td><td>Ghi DB rồi publish event riêng → lệch khi lỗi giữa chừng</td><td>Outbox pattern / CDC (một nguồn sự thật)</td></tr>
+            <tr><td><b>Premature microservices</b></td><td>Startup nhỏ đã tách chục service → chết vì phức tạp vận hành</td><td>Monolith/modular monolith trước</td></tr>
+            <tr><td><b>Cache as source of truth</b></td><td>Coi Redis là DB chính → mất dữ liệu khi cache chết</td><td>Cache chỉ là bản sao; DB bền là nguồn sự thật</td></tr>
+            <tr><td><b>Retry storm</b></td><td>Mọi client retry cùng lúc khi lỗi → đập sập service đang hồi phục</td><td>Backoff + jitter + circuit breaker</td></tr>
+            <tr><td><b>Resume-driven dev</b></td><td>Chọn công nghệ vì đẹp CV, không vì bài toán</td><td>Choose Boring Technology; gắn với nhu cầu thật</td></tr>
+          </table></div>
+          <div class="key"><b>Mẫu số chung:</b> phần lớn anti-pattern đến từ <b>coupling ẩn</b> (phụ thuộc lẫn nhau không rõ ràng) và <b>thêm phức tạp khi chưa cần</b>. Architect giỏi luôn hỏi "cái này tạo phụ thuộc gì, và đã thực sự cần chưa?".</div>
+          <div class="done-row"><input type="checkbox" id="p4-8"><label for="p4-8">Đã hiểu bài này</label></div>
         </div></details>
 
         <div class="out"><strong>📦 Output GĐ 4:</strong> Lấy một hệ thống bạn đang làm thật, viết 1 RFC đề xuất tách/tái cấu trúc kèm sơ đồ C4, 2–3 phương án và bảng trade-off — như trình cho team lead/CTO.</div>
@@ -1521,6 +1679,29 @@
           <div class="done-row"><input type="checkbox" id="p5-6"><label for="p5-6">Đã hiểu bài này</label></div>
         </div></details>
 
+        <details class="lesson"><summary><span class="dot"></span>Cost &amp; Capacity Modeling (FinOps) <span class="hook">· kiến trúc đốt tiền là kiến trúc sai</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao Architect phải nghĩ về chi phí</h5>
+          <p>Một thiết kế "đúng kỹ thuật" nhưng tốn gấp 10 lần cần thiết là thiết kế <b>tồi</b>. Chi phí là một <b>NFR</b> thật sự. Architect giỏi cân hiệu năng/độ bền với hoá đơn cloud.</p>
+          <h5>Capacity planning — ước lượng tài nguyên cần</h5>
+          <ul>
+            <li>Từ estimation (QPS, storage — GĐ1) → suy ra số server, IOPS, băng thông, RAM cache cần.</li>
+            <li>Chừa <b>headroom</b> cho spike (đừng chạy 100% công suất) nhưng đừng over-provision lãng phí.</li>
+            <li>Tính cho <b>peak</b>, không phải trung bình — nhưng dùng auto-scaling để không trả tiền cho peak suốt ngày.</li>
+          </ul>
+          <h5>Các đòn bẩy chi phí lớn (theo thứ tự hay tốn)</h5>
+          <div class="tbl-scroll"><table class="cheat-tbl">
+            <tr><th>Nguồn tốn</th><th>Cách tối ưu</th></tr>
+            <tr><td><b>Egress / băng thông</b> (data ra internet)</td><td>CDN cache (giảm egress từ origin), nén, đặt gần user — thường là khoản ẩn lớn nhất</td></tr>
+            <tr><td><b>Compute luôn bật</b></td><td>Auto-scaling, serverless cho tải biến động, spot instance cho batch</td></tr>
+            <tr><td><b>Storage tăng vô hạn</b></td><td>Tiered storage (nóng→lạnh→archive), TTL/retention, nén (columnar)</td></tr>
+            <tr><td><b>DB đắt &amp; over-provisioned</b></td><td>Cache giảm tải đọc, right-sizing, read replica thay vì nâng cấp master to</td></tr>
+            <tr><td><b>Cross-AZ/region traffic</b></td><td>Giữ traffic trong cùng vùng khi có thể</td></tr>
+          </table></div>
+          <div class="key"><b>Tư duy:</b> Cache không chỉ để nhanh — nó <b>giảm chi phí</b> (ít gọi DB/API tốn tiền). Mỗi quyết định kiến trúc nên kèm ước lượng "cái này tốn bao nhiêu ở quy mô X". Trong ADR, ghi cả trade-off chi phí. "Đắt nhưng đơn giản" đôi khi đúng (tiết kiệm thời gian kỹ sư &gt; tiền server) — cân theo bối cảnh.</div>
+          <div class="done-row"><input type="checkbox" id="p5-7"><label for="p5-7">Đã hiểu bài này</label></div>
+        </div></details>
+
         <div class="out"><strong>📦 Output GĐ 5:</strong> Viết "Reliability &amp; Security review" cho thiết kế ở GĐ 4: liệt kê failure mode, pattern phòng ngừa, threat model STRIDE, và dashboard/alert tối thiểu.</div>
       </div>
     </div>
@@ -1607,6 +1788,54 @@
           <p>1. Làm rõ yêu cầu &amp; NFR → 2. Estimation (QPS, storage) → 3. API &amp; data model → 4. High-level design → 5. Deep dive 1–2 thành phần → 6. Trade-off, bottleneck, cách scale &amp; vận hành.</p>
           <div class="key"><b>Quan trọng nhất không phải "đáp án đúng"</b> mà là chất lượng lập luận trade-off. Mỗi case ghi lại như một mini-ADR → dần dần thành <b>portfolio</b> để trình bày khi phỏng vấn/đề xuất thăng tiến.</div>
           <div class="done-row"><input type="checkbox" id="p6-5"><label for="p6-5">Đã hiểu bài này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>Dẫn dắt Design Review <span class="hook">· kỹ năng đòn bẩy của Architect</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Architect tạo ảnh hưởng không phải bằng cách tự thiết kế mọi thứ, mà bằng cách <b>nâng chất lượng thiết kế của cả tổ chức</b> qua review. Một design review tốt phát hiện vấn đề khi sửa còn rẻ (trên giấy), không phải sau khi đã build.</p>
+          <h5>Cách chạy một review hiệu quả</h5>
+          <ul>
+            <li><b>Đọc trước, họp sau:</b> tài liệu (RFC) gửi trước, mọi người đọc &amp; comment; buổi họp chỉ bàn điểm tranh luận — không đọc slide tại chỗ.</li>
+            <li><b>Hỏi câu mở, không phán xét:</b> "Điều gì xảy ra khi service X chết?", "Tại sao chọn cách này thay vì Y?", "Phần nào em lo nhất?" — giúp tác giả tự thấy lỗ hổng thay vì bị áp đặt.</li>
+            <li><b>Tập trung vào điều khó sửa sau:</b> ranh giới dữ liệu, API contract, mô hình consistency — không sa đà vào tiểu tiết code.</li>
+            <li><b>Phân biệt "chặn" vs "góp ý":</b> nêu rõ đâu là vấn đề phải sửa (blocking) đâu chỉ là gợi ý (nit), để tác giả không tê liệt.</li>
+            <li><b>An toàn tâm lý:</b> review thiết kế, không review con người. Mục tiêu là thiết kế tốt hơn, không phải chứng tỏ ai giỏi hơn.</li>
+          </ul>
+          <div class="key"><b>Checklist câu hỏi vàng khi review:</b> NFR rõ chưa? · Failure mode &amp; resilience? · Dữ liệu nhất quán thế nào? · Có over-engineering không? · Phương án đơn giản hơn? · Migration/rollout ra sao? · Đo lường/observability? · Bảo mật?</div>
+          <div class="done-row"><input type="checkbox" id="p6-6"><label for="p6-6">Đã hiểu bài này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>Tech Strategy, Build-vs-Buy &amp; Tech Radar <span class="hook">· định hướng dài hạn</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Build vs Buy — quyết định Architect hay phải làm</h5>
+          <p>Tự xây hay dùng giải pháp có sẵn (SaaS/open-source)? Khung quyết định:</p>
+          <ul>
+            <li><b>Có phải lợi thế cạnh tranh cốt lõi không?</b> Nếu CÓ → cân nhắc build (kiểm soát, khác biệt). Nếu KHÔNG (auth, email, payment, search hạ tầng) → thường <b>buy/dùng có sẵn</b>, đừng phát minh lại bánh xe.</li>
+            <li><b>Tổng chi phí sở hữu (TCO):</b> build không chỉ là code ban đầu mà còn vận hành, bảo trì, on-call nhiều năm. "Free" thường không free.</li>
+            <li><b>Time-to-market:</b> buy nhanh hơn để ra thị trường; build chậm nhưng kiểm soát.</li>
+            <li><b>Rủi ro khoá nhà cung cấp (vendor lock-in)</b> vs rủi ro tự vận hành.</li>
+          </ul>
+          <h5>Tech Radar &amp; chiến lược công nghệ</h5>
+          <p>Architect duy trì một "radar" công nghệ: phân loại <b>Adopt</b> (dùng tự tin), <b>Trial</b> (thử có kiểm soát), <b>Assess</b> (theo dõi), <b>Hold</b> (tránh/loại bỏ). Giúp tổ chức nhất quán, tránh mỗi team một stack hỗn loạn. Gắn lựa chọn công nghệ với <b>mục tiêu business &amp; năng lực đội ngũ</b>, không theo trend.</p>
+          <div class="key"><b>Tư duy chiến lược:</b> Quyết định công nghệ tốt cân cả 3: nhu cầu business · năng lực &amp; quy mô đội · chi phí dài hạn. Nhớ "Choose Boring Technology" — tiêu "token đổi mới" vào đúng chỗ tạo giá trị.</div>
+          <div class="done-row"><input type="checkbox" id="p6-7"><label for="p6-7">Đã hiểu bài này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>Influence without authority &amp; Mentoring <span class="hook">· nhân sức ảnh hưởng</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Ảnh hưởng không cần quyền lực</h5>
+          <p>Architect thường <b>không quản lý ai</b> nhưng phải khiến nhiều team đi cùng hướng. Cách tạo ảnh hưởng:</p>
+          <ul>
+            <li><b>Uy tín kỹ thuật + lắng nghe:</b> hiểu sâu vấn đề của từng team trước khi đề xuất; người ta theo người vừa giỏi vừa hiểu họ.</li>
+            <li><b>Thuyết phục bằng dữ liệu &amp; trade-off,</b> không bằng chức danh. Cho người khác tham gia vào quyết định → họ sở hữu nó.</li>
+            <li><b>Chọn trận để đánh:</b> không phải mọi điểm đều đáng tranh luận. Giữ vốn ảnh hưởng cho quyết định thực sự quan trọng &amp; khó đảo ngược.</li>
+            <li><b>Viết ra (RFC, ADR):</b> ý tưởng viết rõ lan xa hơn lời nói &amp; tồn tại lâu hơn.</li>
+          </ul>
+          <h5>Mentoring — đòn bẩy lớn nhất</h5>
+          <p>Cách nhân năng lực không phải tự làm nhiều hơn mà là <b>nâng người khác lên</b>. Dạy tư duy (cách hỏi, cách phân tích trade-off) thay vì cho đáp án. Một Architect giỏi để lại sau lưng cả một thế hệ kỹ sư biết tư duy thiết kế — đó là di sản &amp; cũng là thước đo thật sự.</p>
+          <div class="key"><b>Chuyển dịch tư duy khi lên Architect:</b> từ "tôi giải quyết vấn đề" → "tôi giúp tổ chức giải quyết vấn đề tốt hơn &amp; bền hơn". Thành công đo bằng tác động qua người khác, không phải số dòng code bạn viết.</div>
+          <div class="done-row"><input type="checkbox" id="p6-8"><label for="p6-8">Đã hiểu bài này</label></div>
         </div></details>
 
         <div class="out"><strong>📦 Output GĐ 6:</strong> Một bộ portfolio thiết kế (6+ case study + RFC thật tại công ty) đủ để trình bày trong phỏng vấn Architect hoặc đề xuất thăng tiến nội bộ.</div>
@@ -2662,6 +2891,169 @@
             <li>Đừng dùng Kafka như một database để query — nó là log; cần query thì đổ vào store phù hợp.</li>
           </ul>
           <div class="done-row"><input type="checkbox" id="mq-6"><label for="mq-6">Đã nắm cạm bẫy</label></div>
+        </div></details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ DATABASE DEEP DIVE ============ -->
+  <section id="db">
+    <div class="section-card">
+      <div class="phase-head"><span class="tag">Chuyên sâu · Database</span>
+        <h2>🗄️ Database chuyên sâu — mỗi loại giải bài toán gì</h2>
+        <p class="sub">Không có DB "tốt nhất" — chỉ có DB <b>hợp access pattern</b>. Phần này mổ xẻ các DB hàng đầu hiện nay: bản chất, giải bài toán nào, vì sao nhanh ở việc đó, và khi nào KHÔNG dùng.</p></div>
+      <div class="phase-body cheat">
+
+        <div class="callout"><h4>Tư duy chọn DB (đọc trước)</h4>
+          <p style="font-size:14.5px;margin:0">Hỏi 4 câu: <b>(1)</b> Truy cập theo kiểu gì? (theo key? query phức tạp? full-text? quan hệ? tổng hợp số liệu?) <b>(2)</b> Đọc nhiều hay ghi nhiều? <b>(3)</b> Cần transaction/consistency mạnh tới đâu? <b>(4)</b> Quy mô dữ liệu &amp; tăng trưởng? → Câu trả lời quyết định loại DB. <b>SQL (Postgres) là mặc định</b>; chỉ đổi khi có lý do cụ thể.</p>
+        </div>
+
+        <h4 class="mon-h4">Bảng tổng quan — DB nào cho việc gì</h4>
+        <div class="tbl-scroll"><table class="cheat-tbl">
+          <tr><th>Database</th><th>Loại</th><th>Mạnh nhất ở</th><th>Tránh dùng cho</th></tr>
+          <tr><td><b>PostgreSQL</b></td><td>Relational (OLTP)</td><td>Mặc định: quan hệ, transaction, đa năng</td><td>Analytics quét tỉ dòng, ghi phân tán cực lớn</td></tr>
+          <tr><td><b>Cassandra/Scylla</b></td><td>Wide-column (NoSQL)</td><td>Ghi cực lớn, HA đa vùng, time/event data</td><td>Query ad-hoc, JOIN, transaction</td></tr>
+          <tr><td><b>ClickHouse</b></td><td>Columnar (OLAP)</td><td>Phân tích/tổng hợp tỉ dòng, real-time analytics</td><td>OLTP, cập nhật/xoá 1 dòng thường xuyên</td></tr>
+          <tr><td><b>Redis</b></td><td>In-memory KV</td><td>Cache, session, rate-limit, leaderboard, pub/sub</td><td>Nguồn sự thật chính cho dữ liệu lớn bền</td></tr>
+          <tr><td><b>MongoDB</b></td><td>Document</td><td>Schema linh hoạt, dữ liệu lồng JSON</td><td>Quan hệ nhiều, transaction phức tạp xuyên bảng</td></tr>
+          <tr><td><b>DynamoDB</b></td><td>KV/Document (managed)</td><td>Serverless, latency ổn định, scale tự động</td><td>Query linh hoạt, chi phí khó đoán nếu thiết kế sai</td></tr>
+          <tr><td><b>Elasticsearch</b></td><td>Search engine</td><td>Full-text search, log analytics (ELK)</td><td>Nguồn sự thật, transaction</td></tr>
+          <tr><td><b>Neo4j</b></td><td>Graph</td><td>Quan hệ sâu: mạng xã hội, đề xuất, fraud</td><td>Dữ liệu bảng phẳng đơn giản</td></tr>
+          <tr><td><b>TimescaleDB / InfluxDB</b></td><td>Time-series</td><td>Metrics, IoT, dữ liệu theo thời gian</td><td>Dữ liệu quan hệ chung</td></tr>
+          <tr><td><b>CockroachDB / Spanner</b></td><td>NewSQL (distributed SQL)</td><td>SQL + ACID + scale ngang + đa vùng</td><td>Khi 1 Postgres còn đủ (phức tạp &amp; đắt hơn)</td></tr>
+        </table></div>
+
+        <details class="lesson"><summary><span class="dot"></span>PostgreSQL — "the default" đa năng <span class="hook">· OLTP quan hệ</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Giải bài toán gì</h5>
+          <p>Phần lớn ứng dụng "bình thường": dữ liệu có quan hệ, cần transaction ACID, query linh hoạt (JOIN, filter, aggregate). Là điểm khởi đầu đúng cho ~90% dự án.</p>
+          <h5>Vì sao mạnh</h5>
+          <ul>
+            <li>ACID đầy đủ, MVCC (đọc không chặn ghi), isolation level rõ ràng.</li>
+            <li>Cực giàu tính năng: JSONB (làm document store nhẹ), full-text search, GIS (PostGIS), extension (TimescaleDB, pgvector cho AI embedding), window function, CTE.</li>
+            <li>B-Tree index → query &amp; range tốt; tối ưu query mạnh.</li>
+          </ul>
+          <h5>Khi nào tới hạn</h5>
+          <p>Một node Postgres đi rất xa (read replica + cache + sharding thủ công kéo tới hàng chục nghìn TPS). Tới hạn khi: ghi vượt 1 master, dữ liệu quá lớn cho 1 máy, hoặc cần analytics quét tỉ dòng (đó là lúc cân nhắc Cassandra/ClickHouse/NewSQL).</p>
+          <div class="key"><b>Chốt:</b> Đừng vội bỏ Postgres. "Just use Postgres" đúng đáng ngạc nhiên ở quy mô lớn (Instagram, Notion, Figma đều dựa nền Postgres). Chỉ đổi/bổ sung khi có bằng chứng nó không kham.</div>
+          <div class="done-row"><input type="checkbox" id="db-1"><label for="db-1">Đã hiểu</label></div>
+        </div></details>
+
+        <details class="lesson" open><summary><span class="dot"></span>Cassandra / ScyllaDB — ghi khổng lồ, không bao giờ chết <span class="hook">· wide-column, masterless</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Giải bài toán gì</h5>
+          <p>Khi bạn cần <b>ghi cực lớn liên tục</b> (hàng trăm nghìn–triệu writes/s), <b>không được downtime</b>, và <b>trải nhiều datacenter/vùng địa lý</b>. Ví dụ kinh điển: lưu tin nhắn chat, sự kiện/log, time-series, feed, dữ liệu IoT.</p>
+          <h5>Cách hoạt động — vì sao nó làm được điều đó</h5>
+          <div class="diagram"><svg viewBox="0 0 600 165" width="600" height="165" role="img" aria-label="Cassandra ring masterless">
+            <defs><marker id="cas1" markerWidth="7" markerHeight="7" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" fill="var(--accent-2)"/></marker></defs>
+            <circle cx="160" cy="82" r="62" fill="none" stroke="var(--border)" stroke-width="2"/>
+            <g font-size="9.5" text-anchor="middle" fill="var(--text)">
+              <circle cx="160" cy="20" r="11" fill="var(--accent-2)"/><text x="160" y="10" font-size="8">Node A</text>
+              <circle cx="222" cy="82" r="11" fill="var(--accent-2)"/><text x="250" y="86" font-size="8">Node B</text>
+              <circle cx="160" cy="144" r="11" fill="var(--accent-2)"/><text x="160" y="160" font-size="8">Node C</text>
+              <circle cx="98" cy="82" r="11" fill="var(--accent-2)"/><text x="70" y="86" font-size="8">Node D</text>
+            </g>
+            <text x="160" y="86" text-anchor="middle" font-size="8.5" fill="var(--text-dim)">không có leader</text>
+            <text x="160" y="98" text-anchor="middle" font-size="8.5" fill="var(--text-dim)">(peer-to-peer)</text>
+            <g font-size="9.5" fill="var(--text)">
+              <text x="380" y="40">• Ghi tới <tspan font-weight="700">bất kỳ node nào</tspan> (coordinator)</text>
+              <text x="380" y="62">• Dữ liệu phân bố bằng <tspan font-weight="700">consistent hashing</tspan></text>
+              <text x="380" y="84">• Nhân bản N bản, đọc/ghi theo <tspan font-weight="700">quorum</tspan></text>
+              <text x="380" y="106">• LSM-Tree → <tspan font-weight="700" fill="var(--accent-2)">ghi cực nhanh</tspan></text>
+              <text x="380" y="128">• Thêm node → tăng tuyến tính, không downtime</text>
+            </g>
+          </svg><div class="cap">Cassandra không có master (peer-to-peer) → không có SPOF, ghi vào node nào cũng được. Consistent hashing phân bố dữ liệu, quorum cho consistency tuỳ chỉnh, LSM-Tree cho ghi nhanh. Scale tuyến tính bằng cách thêm node.</div></div>
+          <h5>Đặc điểm cốt lõi cần nắm</h5>
+          <ul>
+            <li><b>Masterless / AP:</b> mọi node ngang hàng, chịu được mất node &amp; chia cắt mạng → availability cực cao. Theo CAP thiên về <b>AP</b> (tunable: chọn consistency level per-query).</li>
+            <li><b>Tunable consistency:</b> bạn chọn ONE / QUORUM / ALL cho mỗi đọc/ghi → đánh đổi tốc độ vs đúng đắn theo từng truy vấn.</li>
+            <li><b>Query-driven data modeling:</b> KHÔNG thiết kế bảng theo dữ liệu rồi mới query (như SQL). Phải <b>biết trước query</b> rồi thiết kế bảng phục vụ đúng query đó (thường nhân bản dữ liệu — denormalize). Không có JOIN.</li>
+            <li><b>Partition key</b> quyết định tất cả: chọn sai → hot partition hoặc query phải quét nhiều node.</li>
+          </ul>
+          <h5>Điểm yếu / khi nào KHÔNG dùng</h5>
+          <ul>
+            <li>Không hợp query ad-hoc, không JOIN, không transaction đa bảng. Đổi yêu cầu query sau này rất khổ (phải tạo bảng mới).</li>
+            <li><b>Tombstone</b> (xoá tạo marker) gây chậm nếu xoá nhiều. Đọc có thể chậm hơn ghi.</li>
+            <li>Vận hành phức tạp (repair, compaction tuning).</li>
+          </ul>
+          <h5>Dùng thực tế &amp; ScyllaDB</h5>
+          <p>Netflix, Instagram, Apple, Uber dùng Cassandra cho dữ liệu quy mô khổng lồ. <b>ScyllaDB</b> = viết lại bằng C++ (kiến trúc shard-per-core, không GC pause) → tương thích Cassandra nhưng <b>latency p99 ổn định hơn &amp; ít máy hơn</b>. Discord chuyển Cassandra → Scylla chính vì GC pause &amp; hot partition (xem case #3 ở mục Mổ xẻ hệ thống).</p>
+          <div class="done-row"><input type="checkbox" id="db-2"><label for="db-2">Đã hiểu Cassandra</label></div>
+        </div></details>
+
+        <details class="lesson" open><summary><span class="dot"></span>ClickHouse — phân tích tỉ dòng trong mili-giây <span class="hook">· columnar OLAP</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Giải bài toán gì</h5>
+          <p><b>Analytics / OLAP:</b> tổng hợp (SUM, COUNT, AVG, GROUP BY) trên <b>hàng tỉ dòng</b> gần như tức thì — cho dashboard real-time, phân tích log/event/clickstream, BI. Đây là loại truy vấn mà Postgres/MySQL "chết" vì phải quét toàn bảng.</p>
+          <h5>Cách hoạt động — vì sao nhanh kinh khủng</h5>
+          <div class="diagram"><svg viewBox="0 0 600 165" width="600" height="165" role="img" aria-label="Row vs columnar storage">
+            <g font-size="9" text-anchor="middle" fill="var(--text)">
+              <text x="150" y="14" font-size="10" font-weight="700" fill="var(--pink)">Row store (Postgres)</text>
+              <rect x="40" y="26" width="220" height="20" rx="3" fill="rgba(255,123,156,.08)" stroke="var(--border)"/><text x="150" y="40" font-size="8">[id,name,age,city] [id,name,age,city] …</text>
+              <text x="150" y="62" font-size="8" fill="var(--text-dim)">muốn SUM(age) → vẫn phải đọc CẢ dòng</text>
+              <line x1="300" y1="10" x2="300" y2="150" stroke="var(--border)" stroke-dasharray="3"/>
+              <text x="450" y="14" font-size="10" font-weight="700" fill="var(--accent-2)">Columnar (ClickHouse)</text>
+              <rect x="340" y="26" width="220" height="16" rx="3" fill="var(--bg-soft)" stroke="var(--border)"/><text x="450" y="38" font-size="8">id:   [1,2,3,4,5,…]</text>
+              <rect x="340" y="46" width="220" height="16" rx="3" fill="var(--bg-soft)" stroke="var(--border)"/><text x="450" y="58" font-size="8">name: […]</text>
+              <rect x="340" y="66" width="220" height="16" rx="3" fill="rgba(126,231,135,.18)" stroke="var(--accent-2)"/><text x="450" y="78" font-size="8">age:  [25,30,28,…] ← chỉ đọc cột này</text>
+              <rect x="340" y="86" width="220" height="16" rx="3" fill="var(--bg-soft)" stroke="var(--border)"/><text x="450" y="98" font-size="8">city: […]</text>
+              <text x="450" y="120" font-size="8" fill="var(--accent-2)">SUM(age) → chỉ đọc 1 cột → nhanh + nén tốt</text>
+            </g>
+          </svg><div class="cap">Row store lưu theo dòng → tính tổng 1 cột vẫn phải đọc mọi cột. Columnar lưu theo cột → chỉ đọc đúng cột cần + nén cực mạnh (giá trị giống nhau cạnh nhau) + xử lý vector hoá → nhanh hơn hàng trăm lần cho aggregation.</div></div>
+          <h5>Ba lý do ClickHouse nhanh</h5>
+          <ul>
+            <li><b>Columnar storage:</b> chỉ đọc cột cần cho query (analytics thường chỉ dùng vài cột trên bảng rộng).</li>
+            <li><b>Nén cực mạnh:</b> dữ liệu cùng cột giống nhau → nén 10x+ → đọc ít byte từ đĩa hơn.</li>
+            <li><b>Vectorized execution:</b> xử lý cả khối giá trị một lúc (SIMD), tận dụng CPU cache → throughput khủng.</li>
+          </ul>
+          <h5>Điểm yếu / khi nào KHÔNG dùng</h5>
+          <ul>
+            <li><b>Không phải OLTP:</b> cập nhật/xoá 1 dòng là "mutation" bất đồng bộ &amp; tốn kém — đừng dùng làm DB ứng dụng chính.</li>
+            <li>Không có transaction đầy đủ, không hợp point-lookup tần suất cao (lấy 1 record theo id liên tục).</li>
+            <li>JOIN lớn yếu hơn DB chuyên dụng; thường denormalize trước.</li>
+          </ul>
+          <h5>Dùng thực tế</h5>
+          <p>Cloudflare (phân tích traffic khổng lồ), Uber, hàng loạt nền tảng observability/BI. Thường nằm ở <b>cuối pipeline</b>: dữ liệu thô → Kafka → ClickHouse để truy vấn analytics (xem bài Realtime Analytics #13). Cặp đôi điển hình: <b>Postgres cho OLTP + ClickHouse cho OLAP</b>.</p>
+          <div class="key"><b>Phân biệt cốt lõi:</b> <b>OLTP</b> (Postgres/Cassandra) = nhiều giao dịch nhỏ, đọc/ghi theo record. <b>OLAP</b> (ClickHouse) = ít truy vấn nhưng mỗi cái quét/tổng hợp khối dữ liệu khổng lồ. Đừng nhầm vai trò của chúng.</div>
+          <div class="done-row"><input type="checkbox" id="db-3"><label for="db-3">Đã hiểu ClickHouse</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>Redis · MongoDB · DynamoDB · Elasticsearch · Neo4j · Time-series <span class="hook">· các chuyên dụng còn lại</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Redis — in-memory, sub-millisecond</h5>
+          <p>Giải: cần truy cập <b>cực nhanh</b> (RAM). Dùng cho cache, session, rate limiter, leaderboard (sorted set), distributed lock, pub/sub, hàng đợi nhẹ (Streams), geo. <b>Không</b> dùng làm nguồn sự thật chính cho dữ liệu lớn bền (dù có persistence) — RAM đắt &amp; giới hạn.</p>
+          <h5>MongoDB — document, schema linh hoạt</h5>
+          <p>Giải: dữ liệu dạng JSON lồng nhau, schema thay đổi liên tục (giai đoạn đầu sản phẩm), không cần JOIN nhiều. Mạnh: dev nhanh, sharding sẵn. Yếu: quan hệ phức tạp &amp; transaction xuyên nhiều document (có hỗ trợ nhưng không phải thế mạnh). Lưu ý: Postgres + JSONB thường thay thế được MongoDB cho nhiều case.</p>
+          <h5>DynamoDB — KV managed, serverless</h5>
+          <p>Giải: cần latency ổn định (single-digit ms) ở mọi quy mô mà <b>không muốn vận hành</b> DB. AWS lo hết scaling. Mạnh: auto-scale, bền, dễ. Yếu: phải thiết kế key &amp; access pattern từ đầu (giống Cassandra), query linh hoạt kém, chi phí dễ phình nếu thiết kế sai. Dùng nhiều cho serverless trên AWS.</p>
+          <h5>Elasticsearch — full-text search &amp; log</h5>
+          <p>Giải: tìm kiếm văn bản (inverted index), gợi ý, lọc/facet, và phân tích log (bộ ELK: Elasticsearch + Logstash + Kibana). Yếu: không phải nguồn sự thật, không transaction; thường đồng bộ từ DB chính (qua CDC). Đừng dùng làm primary DB.</p>
+          <h5>Neo4j — graph</h5>
+          <p>Giải: khi <b>quan hệ</b> là trung tâm &amp; cần đi sâu nhiều cấp (bạn-của-bạn, đề xuất, phát hiện gian lận, knowledge graph). Truy vấn graph traversal cực nhanh so với JOIN đệ quy trong SQL. Yếu: không hợp dữ liệu bảng phẳng đơn giản.</p>
+          <h5>Time-series (TimescaleDB / InfluxDB)</h5>
+          <p>Giải: dữ liệu theo thời gian khối lượng lớn — metrics, IoT sensor, giá cổ phiếu. Tối ưu ghi theo thời gian, nén, downsampling, truy vấn theo cửa sổ thời gian. TimescaleDB = extension trên Postgres (giữ SQL).</p>
+          <h5>NewSQL (CockroachDB / Spanner / YugabyteDB)</h5>
+          <p>Giải: muốn <b>SQL + ACID mạnh</b> NHƯNG cũng cần <b>scale ngang &amp; đa vùng</b> như NoSQL — "best of both". Dùng khi Postgres một node không đủ mà vẫn cần transaction phân tán (fintech toàn cầu). Đánh đổi: phức tạp &amp; latency cao hơn; đừng dùng khi 1 Postgres còn đủ.</p>
+          <div class="done-row"><input type="checkbox" id="db-4"><label for="db-4">Đã hiểu nhóm chuyên dụng</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>Cách chọn &amp; "polyglot persistence" trong thực tế <span class="hook">· dùng nhiều DB cùng lúc</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Thực tế: hệ lớn dùng NHIỀU database</h5>
+          <p>Không có một DB làm tốt mọi việc → hệ thống lớn dùng <b>polyglot persistence</b>: mỗi loại dữ liệu để ở DB hợp nhất. Ví dụ một e-commerce thật:</p>
+          <div class="tbl-scroll"><table class="cheat-tbl">
+            <tr><th>Dữ liệu</th><th>DB</th><th>Vì sao</th></tr>
+            <tr><td>User, order, payment</td><td>PostgreSQL</td><td>Quan hệ + transaction (tiền)</td></tr>
+            <tr><td>Session, cache, giỏ hàng tạm</td><td>Redis</td><td>Sub-ms, TTL tự nhiên</td></tr>
+            <tr><td>Tìm kiếm sản phẩm</td><td>Elasticsearch</td><td>Full-text, facet (đồng bộ từ Postgres qua CDC)</td></tr>
+            <tr><td>Sự kiện hành vi / clickstream</td><td>Cassandra → ClickHouse</td><td>Ghi lớn → phân tích</td></tr>
+            <tr><td>Đề xuất "ai cũng mua kèm"</td><td>Neo4j</td><td>Quan hệ sản phẩm</td></tr>
+            <tr><td>Ảnh/video</td><td>Object Storage + CDN</td><td>File lớn (không phải DB)</td></tr>
+          </table></div>
+          <div class="warnbox"><b>Cảnh báo:</b> Polyglot mạnh nhưng <b>mỗi DB thêm vào là chi phí vận hành</b> (học, monitor, backup, đồng bộ). Đừng thêm DB vì "hay" — chỉ thêm khi access pattern thật sự đòi hỏi. Khởi đầu: <b>Postgres + Redis</b> giải quyết được rất nhiều thứ.</div>
+          <div class="key"><b>Quy trình chọn của Architect:</b> 1) Xác định access pattern &amp; NFR → 2) Postgres giải được không? (thường có) → 3) Nếu không, phần nào không kham (ghi quá lớn? analytics? search? graph?) → 4) Thêm đúng DB chuyên dụng cho phần đó, đồng bộ qua CDC/event. Ghi quyết định vào ADR kèm trade-off.</div>
+          <div class="done-row"><input type="checkbox" id="db-5"><label for="db-5">Đã hiểu cách chọn</label></div>
         </div></details>
 
       </div>
