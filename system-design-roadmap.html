@@ -139,7 +139,7 @@
   .res .t{font-weight:700;margin:4px 0 5px;font-size:15px}
   .res .d{font-size:13px;color:var(--text-dim)}
   footer{border-top:1px solid var(--border);padding:30px 0 50px;color:var(--text-dim);font-size:13.5px;text-align:center;margin-top:30px}
-  .tbl-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
+  .tbl-scroll{overflow-x:auto;border-radius:var(--radius)}
   table.assess{width:100%;border-collapse:collapse;font-size:14px}
   table.assess th,table.assess td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top}
   table.assess th{background:var(--bg-soft);font-size:12px;text-transform:uppercase;color:var(--text-dim)}
@@ -202,6 +202,7 @@
       <li><a href="#gallery">13 bài mẫu + sơ đồ</a></li>
       <li><a href="#mq">⭐ RabbitMQ vs Kafka (chuyên sâu)</a></li>
       <li><a href="#db">⭐ Database chuyên sâu (Cassandra, ClickHouse…)</a></li>
+      <li><a href="#money">⭐ Tính đúng tiền trong game đa region</a></li>
       <li><a href="#monitoring">Monitoring &amp; ngưỡng cảnh báo</a></li>
       <li><a href="#cheatsheet">Cheat-sheet tra nhanh</a></li>
       <li><a href="#selftest">Tự kiểm tra (active recall)</a></li>
@@ -3054,6 +3055,139 @@
           <div class="warnbox"><b>Cảnh báo:</b> Polyglot mạnh nhưng <b>mỗi DB thêm vào là chi phí vận hành</b> (học, monitor, backup, đồng bộ). Đừng thêm DB vì "hay" — chỉ thêm khi access pattern thật sự đòi hỏi. Khởi đầu: <b>Postgres + Redis</b> giải quyết được rất nhiều thứ.</div>
           <div class="key"><b>Quy trình chọn của Architect:</b> 1) Xác định access pattern &amp; NFR → 2) Postgres giải được không? (thường có) → 3) Nếu không, phần nào không kham (ghi quá lớn? analytics? search? graph?) → 4) Thêm đúng DB chuyên dụng cho phần đó, đồng bộ qua CDC/event. Ghi quyết định vào ADR kèm trade-off.</div>
           <div class="done-row"><input type="checkbox" id="db-5"><label for="db-5">Đã hiểu cách chọn</label></div>
+        </div></details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MONEY / WALLET MULTI-REGION ============ -->
+  <section id="money">
+    <div class="section-card">
+      <div class="phase-head"><span class="tag">Chuyên sâu · Domain game/fintech</span>
+        <h2>💰 Tính đúng tiền trong game đa region</h2>
+        <p class="sub">Bài toán cốt lõi của game/casino: ví &amp; số dư phải <b>chính xác tuyệt đối</b>, <b>exactly-once mỗi ván</b>, độ trễ thấp cho người chơi toàn cầu, trên <b>nhiều region</b>. Đây là nơi "sai một xu" là không chấp nhận được.</p></div>
+      <div class="phase-body cheat">
+
+        <details class="lesson" open><summary><span class="dot"></span>① Vì sao đây là bài toán khó <span class="hook">· yêu cầu mâu thuẫn nhau</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Các yêu cầu va chạm nhau</h5>
+          <ul>
+            <li><b>Đúng tuyệt đối:</b> không bao giờ mất tiền, không nhân đôi, không âm ví sai. Mỗi ván chỉ trừ/cộng <b>đúng một lần</b> dù mạng chập chờn, client retry, hay disconnect giữa ván.</li>
+            <li><b>Độ trễ thấp toàn cầu:</b> người chơi ở EU, US, Asia đều cần phản hồi spin/bet trong vài chục ms.</li>
+            <li><b>Đa region:</b> nhiều datacenter (latency + chịu lỗi 1 vùng + yêu cầu pháp lý/data residency).</li>
+            <li><b>Concurrency:</b> cùng một ví có thể bị nhiều thao tác đụng (nhiều tab, nhiều game).</li>
+          </ul>
+          <div class="warnbox"><b>Mâu thuẫn gốc (CAP/PACELC):</b> Tiền cần <b>strong consistency</b> (CP). Nhưng "ghi số dư ở bất kỳ region nào với độ trễ thấp" lại muốn AP. <b>Không thể có cả hai</b> cho cùng một ví ghi được khắp nơi. → Mọi kiến trúc đúng đắn đều phải <b>chọn nơi ghi duy nhất cho mỗi ví</b> hoặc trả giá latency consensus xuyên vùng. Đây là điểm mấu chốt của cả bài.</div>
+          <div class="done-row"><input type="checkbox" id="mn-1"><label for="mn-1">Đã hiểu vấn đề</label></div>
+        </div></details>
+
+        <details class="lesson" open><summary><span class="dot"></span>② Nguyên tắc BẤT BIẾN: Ledger kép + Idempotency + Atomic round <span class="hook">· nền của mọi giải pháp đúng</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <h5>1. Double-entry Ledger (sổ cái kép) — nguồn sự thật</h5>
+          <p><b>Không bao giờ <code>UPDATE balance = balance - 100</code> trực tiếp.</b> Thay vào đó, ghi <b>các bút toán bất biến (append-only)</b>: mỗi chuyển động tiền có ≥2 entry, tổng = 0 (tiền không tự sinh/mất). <b>Số dư = tổng các entry</b> của ví đó.</p>
+          <div class="diagram"><svg viewBox="0 0 600 165" width="600" height="165" role="img" aria-label="Double-entry ledger">
+            <g font-size="10" text-anchor="middle" fill="var(--text)">
+              <text x="300" y="14" font-size="10.5" font-weight="700" fill="var(--accent)">Ván: player cược 100 → thua (nhà cái nhận 100)</text>
+              <rect x="60" y="30" width="220" height="30" rx="6" fill="rgba(255,123,156,.08)" stroke="var(--pink)"/><text x="170" y="50">Player wallet:  −100  (debit)</text>
+              <rect x="320" y="30" width="220" height="30" rx="6" fill="rgba(126,231,135,.1)" stroke="var(--accent-2)"/><text x="430" y="50">House:  +100  (credit)</text>
+              <text x="300" y="78" font-size="9" fill="var(--text-dim)">tổng = 0 ✓ (tiền bảo toàn)</text>
+              <text x="300" y="100" font-size="10.5" font-weight="700" fill="var(--accent)">Ván khác: player thắng 250</text>
+              <rect x="60" y="112" width="220" height="30" rx="6" fill="rgba(126,231,135,.1)" stroke="var(--accent-2)"/><text x="170" y="132">Player wallet:  +250</text>
+              <rect x="320" y="112" width="220" height="30" rx="6" fill="rgba(255,123,156,.08)" stroke="var(--pink)"/><text x="430" y="132">House:  −250</text>
+            </g>
+            <text x="300" y="158" text-anchor="middle" font-size="9" fill="var(--accent-2)">Số dư player = SUM(mọi entry của player). Append-only → audit &amp; reconcile được, không mất dấu.</text>
+          </svg><div class="cap">Double-entry: mỗi giao dịch ghi cặp bút toán cân bằng (tổng=0). Số dư là tổng các bút toán, không phải một con số bị ghi đè → truy vết được mọi đồng, không bao giờ "mất dấu tiền".</div></div>
+          <h5>2. Idempotency trên MỌI thao tác tiền</h5>
+          <p>Mỗi bet/spin/giao dịch mang một <b>id duy nhất</b> (<code>round_id</code> / <code>txn_id</code>). Gửi lại cùng id → server <b>trả kết quả cũ, không thực thi lại</b>. Đây là thứ chống "trừ tiền 2 lần" khi client retry hoặc disconnect — sống còn trong game (mạng người chơi rất hay rớt).</p>
+          <h5>3. Atomic round (một ván = một đơn vị nguyên tử)</h5>
+          <p>Trừ cược + tính kết quả + cộng thưởng của một ván phải <b>nguyên tử &amp; idempotent</b> theo <code>round_id</code>. Không để xảy ra trạng thái "đã trừ cược nhưng chưa cộng thưởng" mà không khôi phục được.</p>
+          <div class="key"><b>Ba thứ này là BẤT BIẾN</b> bất kể chọn kiến trúc multi-region nào. Có chúng rồi, bài toán region chỉ còn là "đặt ledger ở đâu &amp; ai được ghi".</div>
+          <div class="done-row"><input type="checkbox" id="mn-2"><label for="mn-2">Đã hiểu nguyên tắc bất biến</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>③ Các phương pháp multi-region hiện tại &amp; cái nào BEST <span class="hook">· so sánh trade-off</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <div class="tbl-scroll"><table class="cheat-tbl">
+            <tr><th>Phương pháp</th><th>Cách làm</th><th>Đúng đắn</th><th>Latency</th><th>Đánh giá</th></tr>
+            <tr><td><b>A. Single global primary</b></td><td>Mọi ghi về 1 region, region khác chỉ read replica</td><td>✅ mạnh</td><td>❌ cao cho người chơi xa</td><td>Đơn giản, đúng — nhưng người chơi xa region chính bị trễ &amp; là điểm nghẽn/SPOF vùng</td></tr>
+            <tr><td><b>B. Home-region per wallet</b> (geo-partition)</td><td>Mỗi ví "thuộc" 1 region; mọi ghi của ví đó về region nhà (single-writer)</td><td>✅ mạnh (không conflict)</td><td>✅ thấp (đa số chơi ở vùng nhà)</td><td><b>⭐ Best thực dụng cho game.</b> Người chơi xa nhà thì routing về home (hiếm, chấp nhận trễ)</td></tr>
+            <tr><td><b>C. NewSQL toàn cầu</b> (Spanner/Cockroach/Yugabyte)</td><td>SQL phân tán, đồng thuận (Raft/TrueTime) đồng bộ xuyên vùng</td><td>✅ mạnh ở mọi nơi</td><td>⚠️ ghi tốn consensus xuyên vùng (chục ms)</td><td><b>⭐ Best khi cần ghi-bất-kỳ-đâu nhất quán.</b> Đắt &amp; phức tạp hơn; latency ghi cao hơn B</td></tr>
+            <tr><td><b>D. Multi-master + LWW</b></td><td>Nhiều region cùng ghi 1 ví, hợp nhất bằng "last write wins"</td><td>❌ MẤT TIỀN</td><td>✅ thấp</td><td><b>🚫 TUYỆT ĐỐI TRÁNH cho tiền.</b> Conflict = ghi đè = sai số dư. LWW không bao giờ dùng cho money</td></tr>
+          </table></div>
+          <div class="key"><b>Lựa chọn BEST (khuyến nghị):</b> Với game, <b>B (Home-region per wallet)</b> là điểm cân bằng tốt nhất: mỗi ví single-writer ở một vùng → strong consistency không conflict, độ trễ thấp vì người chơi chủ yếu ở vùng nhà, lại khớp yêu cầu <b>data residency</b> (tiền/dữ liệu giữ trong vùng theo luật). Khi nghiệp vụ thật sự cần "ghi ví ở bất kỳ đâu nhất quán" → dùng <b>C (NewSQL)</b> làm store cho ledger. Luôn tránh D.</div>
+          <div class="diagram"><svg viewBox="0 0 600 185" width="600" height="185" role="img" aria-label="Home region partitioning">
+            <defs><marker id="fin1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text-dim)"/></marker></defs>
+            <g font-size="9.5" text-anchor="middle" fill="var(--text)">
+              <rect x="30" y="30" width="180" height="120" rx="10" fill="rgba(88,166,255,.05)" stroke="var(--blue)"/><text x="120" y="24" font-size="10" font-weight="700" fill="var(--blue)">Region EU</text>
+              <rect x="55" y="44" width="130" height="26" rx="6" fill="var(--bg-soft)" stroke="var(--accent)"/><text x="120" y="61">Game server EU</text>
+              <rect x="55" y="80" width="130" height="30" rx="6" fill="rgba(126,231,135,.12)" stroke="var(--accent-2)"/><text x="120" y="92">Wallet/Ledger EU</text><text x="120" y="104" font-size="7.5" fill="var(--text-dim)">ví player A (home)</text>
+              <rect x="55" y="118" width="130" height="22" rx="5" fill="var(--bg-soft)" stroke="var(--border)"/><text x="120" y="133" font-size="8">replica (read/failover)</text>
+              <rect x="390" y="30" width="180" height="120" rx="10" fill="rgba(255,123,156,.05)" stroke="var(--pink)"/><text x="480" y="24" font-size="10" font-weight="700" fill="var(--pink)">Region US</text>
+              <rect x="415" y="44" width="130" height="26" rx="6" fill="var(--bg-soft)" stroke="var(--accent)"/><text x="480" y="61">Game server US</text>
+              <rect x="415" y="80" width="130" height="30" rx="6" fill="rgba(126,231,135,.12)" stroke="var(--accent-2)"/><text x="480" y="92">Wallet/Ledger US</text><text x="480" y="104" font-size="7.5" fill="var(--text-dim)">ví player B (home)</text>
+            </g>
+            <path d="M120 70 L120 78" stroke="var(--accent-2)" stroke-width="1.4" fill="none" marker-end="url(#fin1)"/>
+            <path d="M480 70 L480 78" stroke="var(--accent-2)" stroke-width="1.4" fill="none" marker-end="url(#fin1)"/>
+            <text x="120" y="170" font-size="8" fill="var(--accent-2)">A chơi ở EU → ghi local, nhanh</text>
+            <path d="M185 57 Q300 30 480 90" stroke="var(--warn)" stroke-width="1.3" stroke-dasharray="4" fill="none" marker-end="url(#fin1)"/>
+            <text x="320" y="20" font-size="8" fill="var(--warn)">A lỡ chơi ở US → route ghi về home (EU), trễ hơn nhưng đúng</text>
+          </svg><div class="cap">Home-region: ví player A "ở" EU → mọi ghi tiền của A về EU (single-writer, strong). Replica vùng khác để đọc/failover. A chơi tạm ở US → request ghi route về home EU (hiếm, chấp nhận trễ). Không bao giờ 2 vùng cùng ghi 1 ví.</div></div>
+          <div class="done-row"><input type="checkbox" id="mn-3"><label for="mn-3">Đã hiểu các phương pháp</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>④ Luồng một ván game EXACTLY-ONCE <span class="hook">· chống trừ/cộng trùng khi rớt mạng</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Luồng chuẩn (idempotent theo round_id)</h5>
+          <div class="diagram"><svg viewBox="0 0 600 175" width="600" height="175" role="img" aria-label="Exactly-once game round">
+            <defs><marker id="fin2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text-dim)"/></marker></defs>
+            <g font-size="9.5" text-anchor="middle" fill="var(--text)">
+              <rect x="20" y="70" width="80" height="40" rx="8" fill="var(--bg-soft)" stroke="var(--border)"/><text x="60" y="86">Client</text><text x="60" y="100" font-size="7.5" fill="var(--text-dim)">round_id=R1</text>
+              <rect x="140" y="66" width="100" height="48" rx="8" fill="var(--bg-soft)" stroke="var(--accent)"/><text x="190" y="84">Game server</text><text x="190" y="98" font-size="7.5" fill="var(--text-dim)">RNG/kết quả</text>
+              <rect x="290" y="60" width="110" height="60" rx="8" fill="rgba(126,231,135,.1)" stroke="var(--accent-2)"/><text x="345" y="80">Wallet API</text><text x="345" y="94" font-size="7.5" fill="var(--text-dim)">idempotent</text><text x="345" y="106" font-size="7.5" fill="var(--text-dim)">(round_id)</text>
+              <rect x="450" y="66" width="120" height="48" rx="8" fill="var(--bg-soft)" stroke="var(--purple)"/><text x="510" y="84">Ledger (append)</text><text x="510" y="98" font-size="7.5" fill="var(--text-dim)">+ idempotency store</text>
+            </g>
+            <g stroke="var(--text-dim)" stroke-width="1.3" fill="none" marker-end="url(#fin2)">
+              <path d="M100 84 L138 84"/><path d="M240 86 L288 86"/><path d="M400 90 L448 90"/>
+            </g>
+            <g font-size="7.8" fill="var(--text-dim)">
+              <text x="118" y="76">bet R1</text>
+              <text x="265" y="78">debit 100</text>
+              <text x="425" y="82">ghi entry</text>
+            </g>
+            <text x="300" y="140" text-anchor="middle" font-size="9" fill="var(--text)">① debit cược (R1) → ② tính kết quả → ③ credit thưởng (R1) — đều idempotent</text>
+            <text x="300" y="160" text-anchor="middle" font-size="9" fill="var(--warn)">Rớt mạng → client gửi lại R1 → Wallet thấy R1 đã xử lý → trả kết quả cũ, KHÔNG trừ/cộng lại</text>
+          </svg><div class="cap">Mỗi ván gắn round_id. Wallet lưu round_id đã xử lý → request trùng (do retry/disconnect) trả lại kết quả cũ thay vì thực thi lại. Mọi bút toán vào ledger append-only.</div></div>
+          <h5>Hai biến thể debit/credit</h5>
+          <ul>
+            <li><b>Single transaction:</b> một call vừa trừ cược vừa cộng thưởng (kết quả đã biết) — đơn giản, hợp slot/instant game.</li>
+            <li><b>Reserve → Settle (2 bước):</b> giữ (reserve) tiền cược trước, tính kết quả, rồi settle (commit + cộng thưởng) — hợp game có độ trễ/nhiều bước (sports bet, multi-stage). Reserve có TTL để tự nhả nếu treo.</li>
+          </ul>
+          <div class="key"><b>Tích hợp operator/aggregator:</b> trong casino thực, tiền player thường nằm ở ví operator. Game gọi <b>Wallet API của operator</b> với <code>txn_id</code> idempotent (chuẩn như Seamless Wallet). Vẫn áp dụng y nguyên: idempotency + ghi ledger nội bộ để đối soát với operator.</div>
+          <div class="done-row"><input type="checkbox" id="mn-4"><label for="mn-4">Đã hiểu luồng exactly-once</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>⑤ Reconciliation, Audit &amp; cạm bẫy <span class="hook">· tin nhưng phải kiểm</span><span class="arrow proj">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Reconciliation (đối soát) — không thể thiếu</h5>
+          <ul>
+            <li><b>Nội bộ:</b> job định kỳ kiểm <code>SUM(ledger entries) == balance</code> cho mọi ví; phát hiện lệch ngay.</li>
+            <li><b>Với bên ngoài:</b> đối soát với operator/payment provider/aggregator (tổng tiền vào-ra khớp không).</li>
+            <li><b>Audit trail bất biến:</b> ledger append-only cho phép tái dựng &amp; chứng minh mọi đồng tiền — bắt buộc về pháp lý &amp; lòng tin.</li>
+          </ul>
+          <h5>Concurrency trên cùng ví</h5>
+          <p>Trong một region (single-writer), chống race bằng <b>optimistic locking (version)</b> hoặc atomic append + kiểm số dư trong transaction. Không cho 2 thao tác cùng trừ làm âm ví sai.</p>
+          <div class="warnbox"><b>Cạm bẫy chí mạng:</b>
+          <ul>
+            <li>🚫 <code>UPDATE balance</code> trực tiếp (mất audit, dễ race) → dùng ledger.</li>
+            <li>🚫 LWW / multi-master active-active trên ví → mất tiền.</li>
+            <li>🚫 Không idempotent → rớt mạng = trừ/cộng 2 lần.</li>
+            <li>🚫 Dùng số float cho tiền → sai số làm tròn. Dùng <b>integer (đơn vị nhỏ nhất, vd cent)</b> hoặc decimal.</li>
+            <li>🚫 Tin client gửi số tiền/kết quả → server (RGS) phải là nguồn quyết định, validate mọi thứ.</li>
+            <li>🚫 Bỏ qua reconciliation → lệch âm thầm tích tụ tới khi thành sự cố lớn.</li>
+          </ul></div>
+          <div class="key"><b>Tóm tắt kiến trúc BEST cho game đa region:</b> <b>Double-entry ledger append-only</b> làm nguồn sự thật · <b>idempotency theo round_id</b> trên mọi thao tác · <b>home-region per wallet</b> (single-writer, đọc local, replica failover) — hoặc <b>NewSQL</b> nếu cần ghi-bất-kỳ-đâu nhất quán · tiền dạng <b>integer</b> · <b>reconciliation</b> định kỳ. Tránh LWW &amp; update balance trực tiếp.</div>
+          <div class="done-row"><input type="checkbox" id="mn-5"><label for="mn-5">Đã hiểu reconciliation &amp; cạm bẫy</label></div>
         </div></details>
 
       </div>

@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lộ trình trở thành Chuyên gia Kỹ thuật (ngoài System Design)</title>
+<style>
+  :root{
+    --bg:#0d1117; --bg-soft:#161b22; --bg-card:#1c2230; --border:#2d3645;
+    --text:#e6edf3; --text-dim:#9aa7b8; --accent:#bc8cff; --accent-2:#7ee787;
+    --warn:#f0b429; --pink:#ff7b9c; --blue:#58a6ff; --radius:14px;
+    --shadow:0 6px 24px rgba(0,0,0,.35);
+  }
+  [data-theme="light"]{
+    --bg:#f6f8fa; --bg-soft:#fff; --bg-card:#fff; --border:#d8dee4;
+    --text:#1f2328; --text-dim:#57606a; --accent:#8250df; --accent-2:#1a7f37;
+    --warn:#9a6700; --pink:#cf222e; --blue:#0969da; --shadow:0 6px 24px rgba(140,149,159,.2);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+  a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+  .layout{display:grid;grid-template-columns:268px 1fr;gap:32px;align-items:start}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.toc{position:static!important;max-height:none!important}}
+  .hero{background:linear-gradient(135deg,#2a1530 0%,#21183a 55%,#152a40 100%);border-bottom:1px solid var(--border);padding:54px 0 42px;position:relative;overflow:hidden}
+  [data-theme="light"] .hero{background:linear-gradient(135deg,#fce7f3,#ede9fe 55%,#dbeafe)}
+  .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(900px 300px at 80% -10%,rgba(188,140,255,.25),transparent 60%);pointer-events:none}
+  .hero .wrap{position:relative;z-index:1}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent-2);font-weight:700;margin-bottom:14px}
+  h1{font-size:clamp(27px,4vw,42px);line-height:1.15;font-weight:800;letter-spacing:-.02em}
+  h1 .grad{background:linear-gradient(90deg,#bc8cff,#58a6ff,#7ee787);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .lede{margin-top:16px;max-width:780px;color:var(--text-dim);font-size:16.5px}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+  .chip{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:600}
+  [data-theme="light"] .chip{background:rgba(0,0,0,.03)}
+  .topbar{display:flex;justify-content:flex-end;gap:10px;padding-top:18px}
+  .btn{background:var(--bg-card);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:transform .1s,border-color .2s;font-family:inherit}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .progress-wrap{margin:28px 0 8px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;box-shadow:var(--shadow)}
+  .progress-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+  .progress-pct{font-size:22px;font-weight:800;color:var(--accent-2)}
+  .bar{height:12px;background:var(--bg-soft);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+  .bar>i{display:block;height:100%;width:0;background:linear-gradient(90deg,#bc8cff,#7ee787);transition:width .4s ease}
+  .toc{position:sticky;top:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;max-height:calc(100vh - 40px);overflow-y:auto;box-shadow:var(--shadow)}
+  .toc h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:12px}
+  .toc ol{list-style:none;counter-reset:toc}
+  .toc li{counter-increment:toc;margin:4px 0}
+  .toc li a{display:flex;gap:10px;padding:7px 9px;border-radius:8px;color:var(--text-dim);font-size:13.5px;transition:.15s}
+  .toc li a::before{content:counter(toc);flex:0 0 22px;height:22px;line-height:22px;text-align:center;background:var(--bg-soft);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:700;color:var(--accent)}
+  .toc li a:hover{background:var(--bg-soft);color:var(--text);text-decoration:none}
+  section{margin-bottom:38px;scroll-margin-top:20px}
+  .section-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .phase-head{padding:22px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(188,140,255,.06),transparent)}
+  .phase-head .tag{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--warn)}
+  .phase-head h2{font-size:23px;font-weight:800;margin:6px 0 4px;letter-spacing:-.01em;display:flex;align-items:center;gap:12px}
+  .phase-head .sub{color:var(--text-dim);font-size:14.5px}
+  .phase-body{padding:16px 24px 24px}
+  .num-badge{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--blue));color:#fff;font-weight:800;font-size:14px}
+  details.lesson{border:1px solid var(--border);border-radius:12px;margin:12px 0;background:var(--bg-soft);overflow:hidden;transition:border-color .2s}
+  details.lesson[open]{border-color:var(--accent)}
+  details.lesson>summary{list-style:none;cursor:pointer;padding:14px 16px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:15.5px;user-select:none}
+  details.lesson>summary::-webkit-details-marker{display:none}
+  details.lesson>summary .arrow{margin-left:auto;color:var(--text-dim);transition:transform .2s;font-size:13px}
+  details.lesson[open]>summary .arrow{transform:rotate(90deg)}
+  details.lesson>summary .dot{flex:0 0 9px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
+  details.lesson>summary .hook{font-weight:400;color:var(--text-dim);font-size:13.5px;margin-left:2px}
+  .lesson-body{padding:2px 18px 18px 18px;font-size:14.6px}
+  .lesson-body h5{color:var(--accent);font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 6px}
+  .lesson-body p{margin:6px 0}
+  .lesson-body ul{margin:6px 0 6px 20px}
+  .lesson-body li{margin:4px 0}
+  .lesson-body code{background:var(--bg-card);border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-size:13px;font-family:ui-monospace,Menlo,Consolas,monospace}
+  .lesson-body b{color:var(--text)}
+  .lesson-body .key{background:var(--bg-card);border-left:3px solid var(--accent-2);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:14px}
+  .lesson-body .key b{color:var(--accent-2)}
+  .lesson-body .warnbox{background:rgba(240,180,41,.08);border-left:3px solid var(--warn);border-radius:8px;padding:10px 14px;margin:12px 0;font-size:14px}
+  .lesson-body .book{background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:8px 12px;margin:4px 0;font-size:13.5px}
+  .lesson-body .book b{color:var(--blue)}
+  .lesson-body .done-row{display:flex;align-items:center;gap:9px;margin-top:16px;padding-top:12px;border-top:1px dashed var(--border)}
+  .lesson-body .done-row input{appearance:none;width:19px;height:19px;border:2px solid var(--border);border-radius:6px;cursor:pointer;position:relative;background:var(--bg-card)}
+  .lesson-body .done-row input:checked{background:var(--accent-2);border-color:var(--accent-2)}
+  .lesson-body .done-row input:checked::after{content:"✓";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#0d1117;font-weight:900;font-size:12px}
+  .lesson-body .done-row label{font-size:13px;color:var(--text-dim);cursor:pointer}
+  .callout{background:linear-gradient(135deg,rgba(188,140,255,.12),rgba(88,166,255,.08));border:1px solid var(--border);border-radius:var(--radius);padding:18px 22px;margin:16px 0}
+  .callout h4{margin:0 0 6px;color:var(--accent);font-size:15px}
+  .tbl-scroll{overflow-x:auto;border-radius:var(--radius)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+  th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--bg-soft);font-size:11.5px;text-transform:uppercase;color:var(--text-dim)}
+  .diagram{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:14px;margin:14px 0;overflow-x:auto}
+  .diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  .diagram .cap{text-align:center;font-size:12px;color:var(--text-dim);margin-top:8px}
+  .mon-h4{color:var(--accent);font-size:13px;text-transform:uppercase;letter-spacing:.06em;margin:22px 0 8px}
+  footer{border-top:1px solid var(--border);padding:30px 0 50px;color:var(--text-dim);font-size:13.5px;text-align:center;margin-top:30px}
+  .lvl{font-weight:700;font-size:12px;padding:2px 8px;border-radius:6px;white-space:nowrap}
+  .lvl.have{background:rgba(126,231,135,.15);color:var(--accent-2)}
+  .lvl.gap{background:rgba(240,180,41,.15);color:var(--warn)}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="topbar">
+      <button class="btn" id="themeBtn">🌙 Đổi giao diện</button>
+      <button class="btn" id="expandBtn">⤢ Mở tất cả</button>
+      <button class="btn" id="resetBtn">↺ Reset</button>
+    </div>
+    <div class="eyebrow">Hồ sơ chữ T · Senior → Staff/Principal</div>
+    <h1>Trở thành <span class="grad">Chuyên gia Kỹ thuật</span> — những trụ cột ngoài System Design</h1>
+    <p class="lede">System Design chỉ là <b>một</b> trụ cột. Tài liệu này là tấm bản đồ <b>các trụ cột còn lại</b> để bước từ Senior lên chuyên gia thực thụ (Staff/Principal): nền tảng CS, nghề viết code, testing, debugging, hiệu năng, bảo mật, delivery, AI-assisted engineering, giao tiếp, lãnh đạo, product sense và sự nghiệp.</p>
+    <div class="meta-row">
+      <span class="chip">🧱 14 trụ cột</span>
+      <span class="chip">📐 Hồ sơ chữ T / Pi</span>
+      <span class="chip">🪜 Engineer Ladder</span>
+      <span class="chip">📚 Sách best mỗi mảng</span>
+      <span class="chip">✅ Tự lưu tiến độ</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" style="padding-top:24px">
+  <div class="progress-wrap">
+    <div class="progress-head"><strong>Tiến độ (đánh dấu "đã nắm" ở mỗi trụ cột)</strong><span class="progress-pct" id="pct">0%</span></div>
+    <div class="bar"><i id="barFill"></i></div>
+    <div style="margin-top:10px;font-size:13px;color:var(--text-dim)" id="progressTxt">Đã nắm 0 / 0. Tiến độ lưu trên trình duyệt này.</div>
+  </div>
+</div>
+
+<div class="wrap" style="padding-top:28px"><div class="layout">
+
+  <nav class="toc">
+    <h3>Mục lục</h3>
+    <ol>
+      <li><a href="#map">Bản đồ: chữ T &amp; Ladder</a></li>
+      <li><a href="#hard">Nền tảng kỹ thuật cứng</a></li>
+      <li><a href="#delivery">Giao hàng &amp; kỹ năng hiện đại</a></li>
+      <li><a href="#soft">Giao tiếp, lãnh đạo &amp; sự nghiệp</a></li>
+      <li><a href="#plan">Kế hoạch &amp; tài nguyên</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+  <!-- MAP -->
+  <section id="map">
+    <div class="section-card">
+      <div class="phase-head"><span class="tag">Bản đồ tổng thể</span>
+        <h2>🧭 Hồ sơ chữ T &amp; Engineer Ladder</h2>
+        <p class="sub">Hiểu bạn đang ở đâu &amp; cần phát triển theo hình dạng nào trước khi đi vào từng trụ cột.</p></div>
+      <div class="phase-body">
+        <h5 style="color:var(--accent);font-size:12.5px;text-transform:uppercase;margin:6px 0 6px">Chuyên gia = hồ sơ chữ T (rồi tiến tới chữ Pi)</h5>
+        <div class="diagram"><svg viewBox="0 0 600 175" width="600" height="175" role="img" aria-label="T-shaped profile">
+          <g font-size="10" text-anchor="middle" fill="var(--text)">
+            <rect x="60" y="26" width="480" height="30" rx="6" fill="rgba(88,166,255,.12)" stroke="var(--blue)"/><text x="300" y="46" font-size="11" font-weight="700" fill="var(--blue)">BỀ RỘNG: hiểu nhiều mảng (giao tiếp, hệ thống, sản phẩm, vận hành…)</text>
+            <rect x="270" y="56" width="60" height="100" rx="6" fill="rgba(126,231,135,.14)" stroke="var(--accent-2)"/><text x="300" y="100" font-size="9" fill="var(--text)">CHIỀU</text><text x="300" y="114" font-size="9" fill="var(--text)">SÂU</text>
+            <text x="300" y="172" font-size="9" fill="var(--text-dim)">1 thế mạnh sâu (vd Backend/System Design)</text>
+          </g>
+        </svg><div class="cap">Chữ T: một mảng SÂU (lợi thế cạnh tranh) + nhiều mảng RỘNG đủ để cộng tác &amp; ra quyết định tốt. Càng lên cao, thêm chân sâu thứ 2 (chữ Pi).</div></div>
+        <h5 style="color:var(--accent);font-size:12.5px;text-transform:uppercase;margin:18px 0 6px">Engineer Ladder — mỗi cấp khác nhau ở "phạm vi ảnh hưởng"</h5>
+        <div class="tbl-scroll"><table>
+          <tr><th>Cấp</th><th>Phạm vi (scope)</th><th>Giá trị tạo ra qua…</th></tr>
+          <tr><td><b>Junior</b></td><td>Task được giao</td><td>Hoàn thành task tốt, học nhanh</td></tr>
+          <tr><td><b>Mid</b></td><td>Feature / một phần hệ thống</td><td>Tự chủ giải quyết vấn đề rõ ràng</td></tr>
+          <tr><td><b>Senior</b></td><td>Cả một hệ thống / team</td><td>Thiết kế, dẫn dắt kỹ thuật, đỡ người khác</td></tr>
+          <tr><td><b>Staff</b></td><td>Nhiều team / một mảng lớn</td><td>Giải vấn đề mơ hồ, định hướng kỹ thuật, đòn bẩy qua người khác</td></tr>
+          <tr><td><b>Principal</b></td><td>Cả tổ chức / công ty</td><td>Chiến lược kỹ thuật, tác động kinh doanh, định hình văn hoá</td></tr>
+        </table></div>
+        <div class="callout"><h4>Bài học cốt lõi về thăng tiến</h4><p style="font-size:14.5px;margin:0">Lên cấp <b>không phải vì code giỏi hơn</b> mà vì <b>phạm vi ảnh hưởng &amp; tác động lớn hơn</b>. Từ Senior trở lên, giá trị tạo ra <b>qua người khác</b> (thiết kế họ dùng, quyết định họ theo, người bạn nâng lên) vượt giá trị bạn tự code. Đó là lý do các trụ cột "mềm" dưới đây quan trọng ngang kỹ thuật.</p></div>
+        <div class="tbl-scroll"><table>
+          <tr><th>Tự đánh giá nhanh: bạn mạnh/yếu trụ cột nào?</th><th>Trạng thái</th></tr>
+          <tr><td>System Design &amp; kiến trúc (đã có file riêng)</td><td><span class="lvl have">thế mạnh đang xây</span></td></tr>
+          <tr><td>Nền tảng CS · DSA · Code craft · Testing · Debug · Performance · Security</td><td><span class="lvl gap">soi lại bên dưới</span></td></tr>
+          <tr><td>Delivery (Git/CI-CD/Ops) · AI-assisted engineering</td><td><span class="lvl gap">soi lại bên dưới</span></td></tr>
+          <tr><td>Giao tiếp · Lãnh đạo · Product sense · Career</td><td><span class="lvl gap">thường bị bỏ quên</span></td></tr>
+        </table></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HARD TECHNICAL -->
+  <section id="hard">
+    <div class="section-card">
+      <div class="phase-head"><span class="tag">Nhóm 1</span>
+        <h2><span class="num-badge">A</span> Nền tảng kỹ thuật cứng</h2>
+        <p class="sub">Chiều sâu phân biệt chuyên gia với người "chỉ ráp được thư viện". Đây là phần ít hào nhoáng nhưng tạo nền vững.</p></div>
+      <div class="phase-body">
+
+        <details class="lesson"><summary><span class="dot"></span>1 · Nền tảng Khoa học Máy tính (CS Fundamentals) <span class="hook">· hiểu máy tính thật sự chạy thế nào</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Chuyên gia gỡ được lỗi tinh vi &amp; tối ưu sâu vì họ hiểu <b>bên dưới abstraction</b>: bộ nhớ, tiến trình, OS, mạng, runtime. Người chỉ biết framework sẽ bế tắc khi vấn đề chui xuống tầng dưới.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Bộ nhớ &amp; CPU:</b> stack vs heap, cache line, locality, vì sao truy cập RAM tuần tự nhanh hơn ngẫu nhiên; garbage collection (với ngôn ngữ có GC).</li>
+            <li><b>Process &amp; Thread &amp; Concurrency:</b> tiến trình vs luồng, context switch, race condition, lock/mutex, deadlock, async/event loop (đặc biệt với Node.js — single-threaded event loop).</li>
+            <li><b>Hệ điều hành:</b> scheduling, file system, I/O (blocking vs non-blocking), system call.</li>
+            <li><b>Mạng:</b> TCP/IP, DNS, HTTP, TLS (đã có ở file System Design — bổ sung chiều sâu).</li>
+            <li><b>Cách code chạy:</b> compile vs interpret, bytecode/JIT, runtime của ngôn ngữ bạn dùng.</li>
+          </ul>
+          <div class="key"><b>Cách luyện:</b> với mỗi bug "lạ", tự hỏi "ở tầng dưới đang xảy ra gì?". Đọc 1 cuốn nền tảng, và <b>hiểu sâu runtime của ngôn ngữ chính</b> (vd Node.js event loop, libuv, V8). Hiểu một thứ tới tận đáy &gt; biết hời hợt mười thứ.</p></div>
+          <div class="book">📘 <b>Computer Systems: A Programmer's Perspective (CS:APP)</b> · <b>Operating Systems: Three Easy Pieces (OSTEP, free)</b></div>
+          <div class="done-row"><input type="checkbox" id="e-1"><label for="e-1">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>2 · Data Structures, Algorithms &amp; Problem Solving <span class="hook">· tư duy giải quyết vấn đề</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Không phải để "thuộc lòng thuật toán", mà để có <b>tư duy phân tích &amp; chọn cấu trúc dữ liệu đúng</b> — thứ ảnh hưởng trực tiếp tới hiệu năng &amp; sự đơn giản của code. Cũng là phần lớn vòng phỏng vấn cấp cao.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Big-O</b>: phân tích time/space complexity; biết vì sao O(n²) chết ở quy mô lớn.</li>
+            <li><b>Cấu trúc dữ liệu:</b> array, hash map, set, stack/queue, linked list, tree (BST, heap), trie, graph. Biết <b>khi nào dùng cái nào</b> &amp; chi phí mỗi thao tác.</li>
+            <li><b>Kỹ thuật:</b> two pointers, sliding window, recursion, BFS/DFS, binary search, dynamic programming, sorting.</li>
+            <li><b>Quan trọng nhất:</b> kỹ năng <b>bóc tách bài toán</b> → đưa về cấu trúc/thuật toán đã biết.</li>
+          </ul>
+          <div class="warnbox"><b>Góc nhìn thực tế:</b> 95% công việc không cần tự cài thuật toán phức tạp — nhưng <b>chọn sai cấu trúc dữ liệu</b> (dùng list khi cần set/map) là lỗi hiệu năng phổ biến. Luyện DSA để có "trực giác chi phí", không phải để khoe.</div>
+          <div class="book">📗 <b>Grokking Algorithms</b> (dễ vào) · <b>Cracking the Coding Interview</b> (phỏng vấn) · <b>CLRS</b> (tham khảo sâu)</div>
+          <div class="done-row"><input type="checkbox" id="e-2"><label for="e-2">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>3 · Code Craftsmanship — nghề viết code <span class="hook">· clean code, SOLID, refactoring</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Code được <b>đọc nhiều hơn viết</b> hàng chục lần. Chuyên gia viết code người khác (&amp; chính họ 6 tháng sau) hiểu &amp; sửa được dễ dàng. Đây là khác biệt giữa "chạy được" và "bền vững".</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Readability trên hết:</b> đặt tên rõ, hàm nhỏ một việc, giảm nesting, comment "tại sao" không phải "cái gì".</li>
+            <li><b>Nguyên tắc:</b> DRY, KISS, YAGNI, SOLID (đặc biệt Single Responsibility &amp; Dependency Inversion), separation of concerns.</li>
+            <li><b>Design patterns:</b> hiểu ý tưởng (Strategy, Factory, Observer, Adapter, Repository…) — dùng khi hợp, <b>không lạm dụng</b>.</li>
+            <li><b>Refactoring:</b> cải thiện cấu trúc mà không đổi hành vi; nhận diện code smell; làm liên tục từng bước nhỏ (có test bảo vệ).</li>
+            <li><b>Quản lý complexity</b> (Ousterhout): mỗi module nên "deep" — interface đơn giản, che giấu phức tạp bên trong.</li>
+          </ul>
+          <div class="key"><b>Tư duy chuyên gia:</b> mục tiêu không phải code "thông minh" mà code <b>đơn giản &amp; rõ ràng</b>. "Bất kỳ ai cũng viết được code máy hiểu; lập trình viên giỏi viết code người hiểu" (Martin Fowler).</div>
+          <div class="book">📕 <b>A Philosophy of Software Design</b> (Ousterhout) · <b>The Pragmatic Programmer</b> · <b>Refactoring</b> (Fowler) · <b>Clean Code</b> (đọc có chọn lọc)</div>
+          <div class="done-row"><input type="checkbox" id="e-3"><label for="e-3">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>4 · Testing &amp; Quality <span class="hook">· làm cho thay đổi không sợ hãi</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Test tốt cho phép <b>thay đổi code mà không sợ</b> — nền tảng để hệ thống tiến hoá nhanh &amp; an toàn. Chuyên gia coi test là một phần thiết kế, không phải việc làm thêm.</p>
+          <div class="diagram"><svg viewBox="0 0 460 160" width="460" height="160" role="img" aria-label="Test pyramid">
+            <g font-size="11" text-anchor="middle" fill="var(--text)">
+              <polygon points="230,16 290,56 170,56" fill="rgba(255,123,156,.15)" stroke="var(--pink)"/><text x="230" y="46" font-size="10">E2E (ít)</text>
+              <polygon points="170,58 290,58 340,108 120,108" fill="rgba(240,180,41,.12)" stroke="var(--warn)"/><text x="230" y="90" font-size="10">Integration (vừa)</text>
+              <polygon points="120,110 340,110 390,150 70,150" fill="rgba(126,231,135,.12)" stroke="var(--accent-2)"/><text x="230" y="136" font-size="10">Unit (nhiều, nhanh)</text>
+            </g>
+          </svg><div class="cap">Test pyramid: nhiều unit test (nhanh, rẻ), ít hơn integration, rất ít E2E (chậm, giòn). Đừng làm "ice-cream cone" ngược lại.</div></div>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Test pyramid</b> &amp; loại test: unit, integration, e2e, contract test (cho microservices).</li>
+            <li><b>TDD</b> (red-green-refactor): viết test trước giúp thiết kế tốt hơn &amp; bao phủ tự nhiên — luyện ít nhất để hiểu giá trị.</li>
+            <li>Test cái <b>hành vi</b>, không phải implementation; tránh test giòn. Coverage cao ≠ test tốt (đo gì có ý nghĩa).</li>
+            <li>Mocking đúng mức, test data, fixtures; property-based testing, mutation testing (nâng cao).</li>
+          </ul>
+          <div class="book">📗 <b>Test-Driven Development by Example</b> (Kent Beck) · <b>Working Effectively with Legacy Code</b> (Feathers) · <b>Unit Testing Principles, Practices &amp; Patterns</b> (Khorikov)</div>
+          <div class="done-row"><input type="checkbox" id="e-4"><label for="e-4">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>5 · Debugging &amp; Troubleshooting <span class="hook">· kỹ năng bị đánh giá thấp nhất</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Phần lớn thời gian kỹ sư là <b>tìm ra tại sao nó không chạy</b>. Chuyên gia gỡ lỗi nhanh &amp; có hệ thống — không đoán mò, không "đổi đại rồi chạy lại".</p>
+          <h5>Cần nắm — quy trình có hệ thống</h5>
+          <ul>
+            <li><b>Tái tạo lỗi</b> ổn định trước (reproduce) — chưa tái tạo được thì chưa hiểu.</li>
+            <li><b>Hình thành giả thuyết → kiểm chứng</b> (như khoa học), thay vì đổi linh tinh.</li>
+            <li><b>Thu hẹp (bisection):</b> chia đôi không gian tìm kiếm (git bisect, tắt/bật từng phần) để cô lập nguyên nhân.</li>
+            <li><b>Đọc kỹ error/stack trace</b>, log, dùng debugger &amp; breakpoint thành thạo (không chỉ <code>console.log</code>).</li>
+            <li><b>Root cause analysis</b> ("5 Whys") — sửa nguyên nhân gốc, không vá triệu chứng. Viết postmortem cho sự cố lớn.</li>
+          </ul>
+          <div class="key"><b>Mindset:</b> "It's never magic." Máy tính làm đúng những gì được bảo. Bug luôn có lý do logic — nhiệm vụ là tìm ra, không phải đổ tại "lạ". Quan sát (observability) tốt giúp debug production.</div>
+          <div class="book">📘 <b>Debugging</b> (David Agans — 9 quy tắc) · phần Debugging trong <b>The Pragmatic Programmer</b></div>
+          <div class="done-row"><input type="checkbox" id="e-5"><label for="e-5">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>6 · Performance Engineering <span class="hook">· đo trước, tối ưu sau</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Khi hệ thống chậm, chuyên gia <b>đo để tìm bottleneck thật</b> rồi mới tối ưu — không đoán. Tối ưu sai chỗ là lãng phí &amp; thêm phức tạp vô ích.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Đo trước khi tối ưu:</b> profiler (CPU, memory, flame graph), APM, benchmark. "Measure, don't guess."</li>
+            <li><b>Tìm nút thắt:</b> thường là I/O (DB/network) chứ không phải CPU; N+1 query; thiếu index; thiếu cache; serialize/deserialize.</li>
+            <li>Hiểu <b>latency vs throughput</b>, percentile (p99), tail latency (xem file System Design).</li>
+            <li>Memory: rò rỉ bộ nhớ (leak), GC pressure, object lớn.</li>
+            <li>Tối ưu thuật toán (đổi O) trước khi tối ưu vi mô.</li>
+          </ul>
+          <div class="warnbox"><b>Cảnh báo:</b> "Premature optimization is the root of all evil." Đừng tối ưu khi chưa đo &amp; chưa cần. Code rõ ràng trước; tối ưu khi có bằng chứng nút thắt thật.</div>
+          <div class="book">📕 <b>Systems Performance</b> (Brendan Gregg) · <b>High Performance Browser Networking</b> (web)</div>
+          <div class="done-row"><input type="checkbox" id="e-6"><label for="e-6">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>7 · Security — secure coding <span class="hook">· nghĩ như kẻ tấn công</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Một lỗ hổng có thể xoá sạch giá trị mọi tính năng. Chuyên gia mặc định <b>security by design</b> — coi mọi input là thù địch, không vá bảo mật sau.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>OWASP Top 10:</b> injection (SQL/NoSQL/command), XSS, CSRF, broken auth, SSRF, insecure deserialization, lộ dữ liệu nhạy cảm.</li>
+            <li><b>AuthN vs AuthZ</b>, OAuth2/OIDC, JWT, RBAC (chi tiết ở file System Design).</li>
+            <li><b>Validate &amp; sanitize input</b>; parameterized query; least privilege; không tin client.</li>
+            <li><b>Secrets management</b> (không hardcode), encryption at rest/in transit, dependency vulnerability (supply chain).</li>
+            <li><b>Threat modeling</b> (STRIDE) cho thành phần nhận input.</li>
+          </ul>
+          <div class="key"><b>Tư duy:</b> "Don't trust any input." Mọi điểm nhận dữ liệu từ ngoài là bề mặt tấn công. Bảo mật là thuộc tính của thiết kế, không phải tính năng thêm vào cuối.</div>
+          <div class="book">📗 <b>OWASP Cheat Sheet Series</b> (free) · <b>The Web Application Hacker's Handbook</b></div>
+          <div class="done-row"><input type="checkbox" id="e-7"><label for="e-7">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- DELIVERY -->
+  <section id="delivery">
+    <div class="section-card">
+      <div class="phase-head"><span class="tag">Nhóm 2</span>
+        <h2><span class="num-badge">B</span> Giao hàng &amp; kỹ năng hiện đại</h2>
+        <p class="sub">Viết code giỏi chưa đủ — phải đưa được nó tới tay người dùng an toàn, nhanh, lặp lại được. Và biết cộng tác với AI.</p></div>
+      <div class="phase-body">
+
+        <details class="lesson"><summary><span class="dot"></span>8 · Git, CI/CD &amp; Delivery <span class="hook">· đưa code ra sản xuất an toàn</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Tốc độ &amp; độ an toàn khi ship là năng lực cốt lõi của team giỏi (theo nghiên cứu <i>Accelerate</i>/DORA). Chuyên gia làm chủ quy trình giao hàng, không chỉ viết code.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Git thành thạo:</b> branching strategy (trunk-based vs git-flow), rebase vs merge, giải conflict, commit sạch, đọc lịch sử, <code>git bisect</code>.</li>
+            <li><b>CI/CD:</b> pipeline tự động (build → test → deploy), fail fast, mọi merge đều xanh.</li>
+            <li><b>Chiến lược release:</b> blue-green, canary, feature flag, rollback nhanh.</li>
+            <li><b>Containers &amp; IaC:</b> Docker, Kubernetes cơ bản, Terraform — hạ tầng là code, tái lập được.</li>
+            <li><b>4 chỉ số DORA:</b> deploy frequency, lead time, change failure rate, MTTR — thước đo sức khoẻ delivery.</li>
+          </ul>
+          <div class="book">📘 <b>Accelerate</b> (Forsgren) · <b>The Phoenix Project</b> / <b>The DevOps Handbook</b> · <b>Continuous Delivery</b> (Humble)</div>
+          <div class="done-row"><input type="checkbox" id="e-8"><label for="e-8">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>9 · Vận hành &amp; Observability (chạy cái mình xây) <span class="hook">· you build it, you run it</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Code chỉ tạo giá trị khi chạy ổn trong production. Chuyên gia hiểu hệ thống <b>hành xử thế nào khi chạy thật</b> &amp; chịu trách nhiệm vận hành nó.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Observability:</b> logs, metrics, traces (3 trụ cột — chi tiết ở file System Design), dashboard, alert.</li>
+            <li><b>On-call &amp; incident:</b> phản ứng sự cố, giảm thiểu, viết <b>postmortem không đổ lỗi</b> (blameless).</li>
+            <li><b>SLO/SLI/error budget</b>, capacity &amp; cost awareness.</li>
+            <li>Tư duy <b>"design for failure"</b> &amp; vận hành: graceful degradation, runbook.</li>
+          </ul>
+          <div class="key"><b>Liên kết:</b> Phần Reliability/Monitoring chi tiết nằm ở file <b>System Design</b> — ở đây nhấn mạnh: chuyên gia <b>sở hữu trọn vòng đời</b> (code → ship → run → học từ sự cố), không "ném qua tường" cho ops.</div>
+          <div class="book">📕 <b>Site Reliability Engineering</b> (Google, free) · <b>Observability Engineering</b></div>
+          <div class="done-row"><input type="checkbox" id="e-9"><label for="e-9">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>10 · AI-assisted Engineering (kỹ năng 2026) <span class="hook">· cộng tác với AI để nhân năng suất</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Năm 2026, kỹ sư giỏi <b>không bị AI thay thế — mà giỏi cộng tác với AI</b>. Đây trở thành kỹ năng phân biệt mới: dùng AI để tăng tốc gấp nhiều lần mà vẫn giữ chất lượng &amp; quyền kiểm soát.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Giao việc tốt cho AI:</b> mô tả yêu cầu/spec rõ ràng, cung cấp ngữ cảnh đúng, chia nhỏ task — kỹ năng "viết spec" trở nên cực giá trị.</li>
+            <li><b>Review code AI sinh ra một cách hoài nghi:</b> AI sai một cách rất thuyết phục. Bạn vẫn chịu trách nhiệm cuối cùng → phải hiểu &amp; verify, không copy mù.</li>
+            <li><b>Biết giới hạn:</b> AI mạnh ở boilerplate, khám phá, giải thích; yếu ở quyết định kiến trúc lớn, ngữ cảnh ngầm, đánh đổi tinh tế — đó là chỗ giá trị con người tăng lên.</li>
+            <li><b>Dùng AI để học nhanh:</b> giải thích codebase lạ, khái niệm mới, đóng vai người review/phản biện.</li>
+            <li>Hiểu cơ bản LLM (token, context, hallucination, RAG, agent) để dùng đúng công cụ.</li>
+          </ul>
+          <div class="key"><b>Tư duy:</b> AI nâng "sàn" năng suất nhưng <b>"trần" vẫn là khả năng phán đoán kỹ thuật của bạn</b>. Càng nhiều code do AI sinh, càng cần kỹ năng <b>thiết kế, review, và judgment</b> — chính là các trụ cột trong tài liệu này. Đừng để AI thay tư duy; để nó thay gõ phím.</div>
+          <div class="done-row"><input type="checkbox" id="e-10"><label for="e-10">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- SOFT / CAREER -->
+  <section id="soft">
+    <div class="section-card">
+      <div class="phase-head"><span class="tag">Nhóm 3 · quyết định việc thăng tiến</span>
+        <h2><span class="num-badge">C</span> Giao tiếp, Lãnh đạo &amp; Sự nghiệp</h2>
+        <p class="sub">Đây là phần <b>thực sự chặn</b> việc lên Senior+ — nhưng hay bị kỹ sư xem nhẹ. Càng lên cao, càng quan trọng hơn kỹ thuật thuần.</p></div>
+      <div class="phase-body">
+
+        <details class="lesson"><summary><span class="dot"></span>11 · Giao tiếp &amp; Viết kỹ thuật <span class="hook">· nhân giá trị của mọi thứ khác</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Ý tưởng giỏi mà không truyền đạt được thì vô giá trị. Viết &amp; nói rõ ràng là <b>đòn bẩy</b> nhân mọi kỹ năng khác — và là thứ phân biệt rõ nhất ở cấp cao.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Viết kỹ thuật:</b> RFC/design doc, ADR, PR description rõ ràng, documentation, postmortem. Viết để người bận đọc lướt vẫn hiểu (ý chính trước, ngắn gọn).</li>
+            <li><b>Biết khán giả:</b> diễn đạt khác nhau cho dev / quản lý / business — dịch kỹ thuật sang ngôn ngữ tác động (chi phí, rủi ro, thời gian).</li>
+            <li><b>Giao tiếp trong PR &amp; review:</b> feedback tử tế &amp; cụ thể, bất đồng có lý lẽ, không công kích.</li>
+            <li><b>Trình bày:</b> nói trước nhóm, demo, giải thích quyết định &amp; bảo vệ nó.</li>
+          </ul>
+          <div class="key"><b>Tư duy:</b> "Viết rõ = nghĩ rõ." Ép mình viết ra buộc tư duy mạch lạc. Mỗi tài liệu tốt là một bản sao của bạn làm việc thay bạn khi bạn vắng mặt — đó là đòn bẩy.</div>
+          <div class="book">📗 <b>On Writing Well</b> (Zinsser) · <b>The Pyramid Principle</b> (Minto) · Google Technical Writing (free)</div>
+          <div class="done-row"><input type="checkbox" id="e-11"><label for="e-11">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>12 · Lãnh đạo, Mentoring &amp; Ảnh hưởng <span class="hook">· tạo tác động qua người khác</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Từ Senior trở lên, bạn được đánh giá bằng <b>tác động lên người &amp; tổ chức xung quanh</b>, không chỉ output cá nhân. Đây là bước nhảy tư duy lớn nhất.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Mentoring:</b> nâng người khác lên — dạy <i>cách tư duy</i> (cách hỏi, phân tích trade-off) thay vì cho đáp án. Đòn bẩy lớn nhất của bạn.</li>
+            <li><b>Influence without authority:</b> khiến người khác đồng thuận bằng uy tín + lý lẽ + lắng nghe, không bằng chức danh; chọn trận đáng đánh.</li>
+            <li><b>Tech leadership:</b> dẫn dắt kỹ thuật một sáng kiến, chia việc, gỡ vướng cho team, giữ chuẩn chất lượng.</li>
+            <li><b>Ownership:</b> chủ động nhận trách nhiệm cho kết quả (không chỉ task), nhìn xa hơn phần việc của mình.</li>
+            <li>Cho &amp; nhận feedback; xử lý xung đột; xây niềm tin.</li>
+          </ul>
+          <div class="key"><b>Bước nhảy:</b> "tôi giải quyết vấn đề" → "tôi giúp tổ chức giải quyết vấn đề tốt &amp; bền hơn". Di sản của chuyên gia là những kỹ sư họ đã nâng lên &amp; quyết định tốt còn lại sau khi họ đi.</div>
+          <div class="book">📕 <b>The Staff Engineer's Path</b> (Tanya Reilly) · <b>Staff Engineer: Leadership beyond the management track</b> (Will Larson) · <b>The Pragmatic Programmer</b></div>
+          <div class="done-row"><input type="checkbox" id="e-12"><label for="e-12">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>13 · Product &amp; Business Sense <span class="hook">· hiểu vì sao mình code, không chỉ code gì</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Chuyên gia tạo <b>tác động kinh doanh</b>, không chỉ giải pháp kỹ thuật đẹp. Hiểu user &amp; business giúp bạn xây đúng thứ &amp; ưu tiên đúng — và được tin tưởng giao quyết định lớn.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Hiểu "tại sao":</b> tính năng này giải vấn đề gì của user/business? Đo thành công bằng gì (metric)?</li>
+            <li><b>Ưu tiên theo tác động:</b> phân biệt việc quan trọng vs việc thú vị; biết nói "không"/"chưa" với scope thừa.</li>
+            <li><b>Trade-off kỹ thuật ↔ kinh doanh:</b> cân chất lượng vs time-to-market; technical debt có chủ đích.</li>
+            <li><b>Gần gũi user:</b> hiểu vấn đề thật, dùng dữ liệu, không xây trong tháp ngà.</li>
+            <li>Cơ bản về cách công ty kiếm tiền &amp; chi phí kỹ thuật ảnh hưởng nó.</li>
+          </ul>
+          <div class="key"><b>Tư duy:</b> Kỹ sư cấp cao hỏi "<b>có nên xây không &amp; xây cái gì</b>", không chỉ "xây thế nào". Giải pháp đơn giản giải đúng vấn đề &gt; giải pháp tinh xảo giải sai vấn đề.</div>
+          <div class="book">📗 <b>Inspired</b> (Marty Cagan) · <b>The Lean Startup</b> (tư duy build-measure-learn)</div>
+          <div class="done-row"><input type="checkbox" id="e-13"><label for="e-13">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+        <details class="lesson"><summary><span class="dot"></span>14 · Sự nghiệp, Học cách học &amp; Mindset <span class="hook">· chơi ván dài</span><span class="arrow">▶</span></summary>
+        <div class="lesson-body">
+          <h5>Vì sao quan trọng</h5>
+          <p>Nghề này thay đổi liên tục — chuyên gia là người <b>học suốt đời hiệu quả</b> &amp; quản lý sự nghiệp chủ động, bền bỉ không kiệt sức.</p>
+          <h5>Cần nắm</h5>
+          <ul>
+            <li><b>Deliberate practice:</b> luyện có chủ đích vào điểm yếu &amp; thứ hơi-quá-sức, có phản hồi — không phải "làm nhiều giờ". Đây là chìa khoá thật của chuyên gia.</li>
+            <li><b>Học cách học:</b> học từ first principles, dạy lại (Feynman), đọc source code &amp; tài liệu gốc, học từ người giỏi hơn.</li>
+            <li><b>Quản lý sự nghiệp:</b> hiểu career ladder &amp; kỳ vọng mỗi cấp; tìm <b>scope &amp; tác động</b> để lên cấp; tìm sponsor (người nói tốt về bạn khi bạn vắng mặt), không chỉ mentor; xây "reputation".</li>
+            <li><b>Chọn việc &amp; môi trường</b> giúp bạn phát triển (dự án khó, người giỏi xung quanh).</li>
+            <li><b>Bền vững:</b> deep work, tránh burnout, sức khoẻ — đây là cuộc chơi nhiều thập kỷ.</li>
+          </ul>
+          <div class="key"><b>Sự thật về chuyên gia:</b> không phải tài năng bẩm sinh mà là <b>nhiều năm luyện tập có chủ đích đúng hướng</b> + học từ phản hồi. Bạn kiểm soát được điều đó. Kiên định &gt; bùng nổ ngắn hạn.</div>
+          <div class="book">📘 <b>The Staff Engineer's Path</b> · <b>Apprenticeship Patterns</b> (free) · <b>Peak</b> (Ericsson — deliberate practice) · <b>Deep Work</b> (Cal Newport) · <b>Ultralearning</b></div>
+          <div class="done-row"><input type="checkbox" id="e-14"><label for="e-14">Đã nắm trụ cột này</label></div>
+        </div></details>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- PLAN -->
+  <section id="plan">
+    <div class="section-card">
+      <div class="phase-head"><span class="tag">Tổng kết</span><h2>🎯 Cách dùng &amp; nguyên tắc</h2></div>
+      <div class="phase-body">
+        <div class="callout"><h4>Đừng học dàn trải — đi theo chữ T</h4><p style="font-size:14.5px;margin:0"><b>1.</b> Giữ chiều SÂU ở thế mạnh của bạn (Backend/System Design — file kia). <b>2.</b> Soi 14 trụ cột trên, chọn <b>2–3 cái yếu nhất đang cản trở bạn</b> ngay lúc này, tập trung vào đó trước. <b>3.</b> Học mọi thứ <b>qua công việc thật</b> — áp vào dự án đang làm, không học lý thuyết suông.</p></div>
+
+        <h4 class="mon-h4">Thứ tự ưu tiên gợi ý cho người ~5 năm backend muốn lên Architect/Staff</h4>
+        <div class="tbl-scroll"><table>
+          <tr><th>Ưu tiên</th><th>Trụ cột</th><th>Vì sao</th></tr>
+          <tr><td>1</td><td>Giao tiếp &amp; Viết · Lãnh đạo/Mentoring</td><td>Thường là điểm chặn thật sự để lên cấp; đòn bẩy cao nhất</td></tr>
+          <tr><td>2</td><td>Code Craftsmanship · Testing · Debugging</td><td>Nâng chất lượng &amp; uy tín kỹ thuật hằng ngày</td></tr>
+          <tr><td>3</td><td>AI-assisted Engineering</td><td>Nhân năng suất ngay, kỹ năng 2026</td></tr>
+          <tr><td>4</td><td>Product &amp; Business sense</td><td>Để được giao quyết định lớn &amp; tạo tác động</td></tr>
+          <tr><td>5</td><td>CS fundamentals · Performance · Security (đào sâu dần)</td><td>Nền vững &amp; chiều sâu phân biệt chuyên gia</td></tr>
+        </table></div>
+
+        <div class="callout"><h4>Nguyên tắc cuối</h4><p style="font-size:14.5px;margin:0">Chuyên gia <b>không phải biết hết mọi thứ</b> — mà là có <b>nền vững + một thế mạnh sâu + khả năng học nhanh thứ chưa biết + tạo tác động qua người khác</b>. Đây là cuộc chơi nhiều năm: kiên định luyện tập có chủ đích &amp; áp dụng thực tế quan trọng hơn đọc thêm tài liệu. Kết hợp file này với file <b>System Design</b> là bộ đôi đủ để định hướng cả chặng đường. 🚀</p></div>
+      </div>
+    </div>
+  </section>
+
+  </main>
+</div></div>
+
+<footer><div class="wrap">
+  Lộ trình trở thành Chuyên gia Kỹ thuật · 14 trụ cột ngoài System Design · bổ trợ cho file System Design Roadmap<br>
+  Tiến độ lưu cục bộ bằng <code>localStorage</code>. Đi đường dài, luyện có chủ đích. 🌱
+</div></footer>
+
+<script>
+(function(){
+  var STORE='expert-roadmap-v1', THEME='expert-roadmap-theme';
+  var themeBtn=document.getElementById('themeBtn');
+  function applyTheme(t){if(t==='light'){document.documentElement.setAttribute('data-theme','light');themeBtn.textContent='☀️ Giao diện sáng';}else{document.documentElement.removeAttribute('data-theme');themeBtn.textContent='🌙 Giao diện tối';}}
+  var st=null;try{st=localStorage.getItem(THEME);}catch(e){}
+  applyTheme(st||'dark');
+  themeBtn.addEventListener('click',function(){var l=document.documentElement.getAttribute('data-theme')==='light';var n=l?'dark':'light';applyTheme(n);try{localStorage.setItem(THEME,n);}catch(e){}});
+  var boxes=Array.prototype.slice.call(document.querySelectorAll('.done-row input[type=checkbox]'));
+  var pctEl=document.getElementById('pct'),barEl=document.getElementById('barFill'),txtEl=document.getElementById('progressTxt');
+  function load(){var d={};try{d=JSON.parse(localStorage.getItem(STORE)||'{}');}catch(e){}boxes.forEach(function(b){if(d[b.id])b.checked=true;});}
+  function save(){var d={};boxes.forEach(function(b){if(b.checked)d[b.id]=1;});try{localStorage.setItem(STORE,JSON.stringify(d));}catch(e){}}
+  function update(){var t=boxes.length,done=boxes.filter(function(b){return b.checked;}).length,p=t?Math.round(done/t*100):0;pctEl.textContent=p+'%';barEl.style.width=p+'%';txtEl.textContent='Đã nắm '+done+' / '+t+' trụ cột. Tiến độ lưu trên trình duyệt này.';}
+  boxes.forEach(function(b){b.addEventListener('change',function(){save();update();});});
+  document.getElementById('resetBtn').addEventListener('click',function(){if(!confirm('Xoá toàn bộ tiến độ?'))return;boxes.forEach(function(b){b.checked=false;});save();update();});
+  var expanded=false, details=Array.prototype.slice.call(document.querySelectorAll('details.lesson'));
+  document.getElementById('expandBtn').addEventListener('click',function(){expanded=!expanded;details.forEach(function(d){d.open=expanded;});this.textContent=expanded?'⤡ Thu gọn':'⤢ Mở tất cả';});
+  load();update();
+})();
+</script>
+</body>
+</html>
