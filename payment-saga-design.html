@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design: Order + Payment qua Saga Orchestration</title>
+<style>
+  :root{
+    --bg:#0d1117; --bg-soft:#161b22; --bg-card:#1c2230; --border:#2d3645;
+    --text:#e6edf3; --text-dim:#9aa7b8; --accent:#7ee787; --accent-2:#58a6ff;
+    --warn:#f0b429; --pink:#ff7b9c; --purple:#bc8cff; --radius:14px;
+    --shadow:0 6px 24px rgba(0,0,0,.35);
+  }
+  [data-theme="light"]{
+    --bg:#f6f8fa; --bg-soft:#fff; --bg-card:#fff; --border:#d8dee4;
+    --text:#1f2328; --text-dim:#57606a; --accent:#1a7f37; --accent-2:#0969da;
+    --warn:#9a6700; --pink:#cf222e; --purple:#8250df; --shadow:0 6px 24px rgba(140,149,159,.2);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Inter",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased;transition:background .25s,color .25s}
+  a{color:var(--accent-2);text-decoration:none}a:hover{text-decoration:underline}
+  .wrap{max-width:1100px;margin:0 auto;padding:0 20px}
+  .layout{display:grid;grid-template-columns:250px 1fr;gap:32px;align-items:start}
+  @media(max-width:900px){.layout{grid-template-columns:1fr}.toc{position:static!important;max-height:none!important}}
+  .hero{background:linear-gradient(135deg,#15281b 0%,#1b2a4a 55%,#21183a 100%);border-bottom:1px solid var(--border);padding:52px 0 40px;position:relative;overflow:hidden}
+  [data-theme="light"] .hero{background:linear-gradient(135deg,#dcfce7,#dbeafe 55%,#ede9fe)}
+  .hero::after{content:"";position:absolute;inset:0;background:radial-gradient(900px 300px at 80% -10%,rgba(126,231,135,.22),transparent 60%);pointer-events:none}
+  .hero .wrap{position:relative;z-index:1}
+  .eyebrow{display:inline-block;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:14px}
+  h1{font-size:clamp(26px,4vw,40px);line-height:1.15;font-weight:800;letter-spacing:-.02em}
+  h1 .grad{background:linear-gradient(90deg,#7ee787,#58a6ff,#bc8cff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .lede{margin-top:16px;max-width:760px;color:var(--text-dim);font-size:16px}
+  .meta-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:20px}
+  .chip{background:rgba(255,255,255,.06);border:1px solid var(--border);color:var(--text);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:600}
+  [data-theme="light"] .chip{background:rgba(0,0,0,.03)}
+  .topbar{display:flex;justify-content:flex-end;gap:10px;padding-top:18px}
+  .btn{background:var(--bg-card);border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit}
+  .btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+  .toc{position:sticky;top:20px;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:18px;max-height:calc(100vh - 40px);overflow-y:auto;box-shadow:var(--shadow)}
+  .toc h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--text-dim);margin-bottom:12px}
+  .toc ol{list-style:none;counter-reset:toc}
+  .toc li{counter-increment:toc;margin:4px 0}
+  .toc li a{display:flex;gap:10px;padding:7px 9px;border-radius:8px;color:var(--text-dim);font-size:13.5px;transition:.15s}
+  .toc li a::before{content:counter(toc);flex:0 0 22px;height:22px;line-height:22px;text-align:center;background:var(--bg-soft);border:1px solid var(--border);border-radius:6px;font-size:11px;font-weight:700;color:var(--accent)}
+  .toc li a:hover{background:var(--bg-soft);color:var(--text);text-decoration:none}
+  section{margin-bottom:30px;scroll-margin-top:20px}
+  .card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow)}
+  .head{padding:20px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(126,231,135,.06),transparent)}
+  .head .tag{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--warn)}
+  .head h2{font-size:21px;font-weight:800;margin:6px 0 2px;display:flex;align-items:center;gap:12px}
+  .head .sub{color:var(--text-dim);font-size:14px}
+  .body{padding:18px 24px 22px;font-size:14.6px}
+  .body h4{color:var(--accent);font-size:12.5px;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 8px}
+  .body p{margin:6px 0}.body ul{margin:6px 0 6px 20px}.body li{margin:4px 0}
+  .body code{background:var(--bg-soft);border:1px solid var(--border);border-radius:5px;padding:1px 6px;font-size:13px;font-family:ui-monospace,Menlo,monospace}
+  .body b{color:var(--text)}
+  .num{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0d1117;font-weight:800;font-size:14px}
+  .key{background:var(--bg-soft);border-left:3px solid var(--accent);border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px}
+  .key b{color:var(--accent)}
+  .warnbox{background:rgba(240,180,41,.08);border-left:3px solid var(--warn);border-radius:8px;padding:11px 15px;margin:12px 0;font-size:14px}
+  .diagram{background:var(--bg-soft);border:1px solid var(--border);border-radius:10px;padding:14px;margin:14px 0;overflow-x:auto}
+  .diagram svg{display:block;margin:0 auto;max-width:100%;height:auto}
+  .diagram .cap{text-align:center;font-size:12px;color:var(--text-dim);margin-top:8px}
+  .tbl-scroll{overflow-x:auto;border-radius:var(--radius)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin:8px 0}
+  th,td{border:1px solid var(--border);padding:9px 12px;text-align:left;vertical-align:top}
+  th{background:var(--bg-soft);font-size:11.5px;text-transform:uppercase;color:var(--text-dim)}
+  .pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:5px}
+  .pill.ok{background:rgba(126,231,135,.15);color:var(--accent)}
+  .pill.bad{background:rgba(255,123,156,.15);color:var(--pink)}
+  footer{border-top:1px solid var(--border);padding:28px 0 46px;color:var(--text-dim);font-size:13px;text-align:center;margin-top:24px}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="topbar"><button class="btn" id="themeBtn">🌙 Đổi giao diện</button></div>
+    <div class="eyebrow">Design Doc · Distributed Transaction</div>
+    <h1>Order + Payment qua <span class="grad">Saga Orchestration</span></h1>
+    <p class="lede">Phân tích thiết kế một luồng đặt hàng có thanh toán xuyên 3 microservice (mỗi service một DB) — giải bài distributed transaction bằng <b>Saga + compensation</b>, đảm bảo đúng tiền bằng <b>idempotency, outbox &amp; double-entry ledger</b>. (Tài liệu phân tích — không kèm code.)</p>
+    <div class="meta-row">
+      <span class="chip">⚙️ Go · RabbitMQ · PostgreSQL</span>
+      <span class="chip">🔀 Saga Orchestration</span>
+      <span class="chip">💰 Double-entry Ledger</span>
+      <span class="chip">♻️ Idempotency + Outbox</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap" style="padding-top:28px"><div class="layout">
+
+  <nav class="toc">
+    <h3>Mục lục</h3>
+    <ol>
+      <li><a href="#goal">Mục tiêu &amp; phạm vi</a></li>
+      <li><a href="#arch">Kiến trúc tổng thể</a></li>
+      <li><a href="#happy">Saga — happy path</a></li>
+      <li><a href="#comp">Compensation khi lỗi</a></li>
+      <li><a href="#state">Saga state machine</a></li>
+      <li><a href="#patterns">Patterns cốt lõi</a></li>
+      <li><a href="#mq">RabbitMQ topology</a></li>
+      <li><a href="#fail">Failure modes</a></li>
+      <li><a href="#trade">Trade-offs</a></li>
+      <li><a href="#bp">Best practices đúc kết</a></li>
+      <li><a href="#verify">Kịch bản verify</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+  <!-- GOAL -->
+  <section id="goal"><div class="card">
+    <div class="head"><span class="tag">Tổng quan</span><h2><span class="num">1</span> Mục tiêu &amp; phạm vi</h2></div>
+    <div class="body">
+      <h4>Bài toán</h4>
+      <p>Nghiệp vụ "đặt hàng có thanh toán" trải trên 3 service, mỗi service một DB → <b>không còn transaction ACID đơn bao trùm</b>. Cần đảm bảo "tất cả hoặc không gì cả" mà không dùng 2PC.</p>
+      <h4>Trong phạm vi</h4>
+      <ul>
+        <li>Luồng: <code>Reserve Inventory</code> → <code>Process Payment</code> → <code>Confirm Order</code>, có bù trừ khi lỗi.</li>
+        <li>3 service Go độc lập, mỗi cái Postgres riêng; RabbitMQ command/reply; Docker Compose.</li>
+        <li>Orchestrator nằm trong Order Service. Mock payment gateway (ép fail được để test).</li>
+      </ul>
+      <h4>Ngoài phạm vi (YAGNI)</h4>
+      <p>Gateway/tiền thật · auth · UI · multi-region (chỉ nêu nguyên tắc) · choreography (để stretch).</p>
+      <div class="key"><b>Mục tiêu học:</b> nắm chắc Saga orchestration + compensation, idempotency, transactional outbox, double-entry ledger, và trade-off Saga vs 2PC / orchestration vs choreography.</div>
+    </div>
+  </div></section>
+
+  <!-- ARCH -->
+  <section id="arch"><div class="card">
+    <div class="head"><span class="tag">Architecture</span><h2><span class="num">2</span> Kiến trúc tổng thể</h2></div>
+    <div class="body">
+      <div class="diagram"><svg viewBox="0 0 620 250" width="620" height="250" role="img" aria-label="Architecture overview">
+        <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text-dim)"/></marker></defs>
+        <g font-size="10.5" text-anchor="middle" fill="var(--text)">
+          <rect x="14" y="100" width="74" height="40" rx="8" fill="var(--bg-card)" stroke="var(--border)"/><text x="51" y="124">Client</text>
+          <rect x="120" y="92" width="120" height="56" rx="8" fill="rgba(126,231,135,.1)" stroke="var(--accent)"/><text x="180" y="112">Order Service</text><text x="180" y="128" font-size="8.5" fill="var(--text-dim)">+ Saga Orchestrator</text><text x="180" y="140" font-size="8" fill="var(--text-dim)">orderdb</text>
+          <rect x="285" y="100" width="90" height="42" rx="8" fill="rgba(240,180,41,.1)" stroke="var(--warn)"/><text x="330" y="118">RabbitMQ</text><text x="330" y="132" font-size="8" fill="var(--text-dim)">command/reply</text>
+          <rect x="420" y="30" width="120" height="48" rx="8" fill="var(--bg-card)" stroke="var(--accent-2)"/><text x="480" y="50">Inventory Service</text><text x="480" y="66" font-size="8" fill="var(--text-dim)">inventorydb</text>
+          <rect x="420" y="160" width="120" height="56" rx="8" fill="var(--bg-card)" stroke="var(--accent-2)"/><text x="480" y="180">Payment Service</text><text x="480" y="195" font-size="8" fill="var(--text-dim)">paymentdb + ledger</text><text x="480" y="207" font-size="8" fill="var(--text-dim)">mock gateway</text>
+        </g>
+        <g stroke="var(--text-dim)" stroke-width="1.4" fill="none" marker-end="url(#a1)">
+          <path d="M88 120 L118 120"/><text x="103" y="113" font-size="8" fill="var(--text-dim)" text-anchor="middle">POST</text>
+          <path d="M240 116 L283 118"/>
+          <path d="M375 110 L418 70"/><path d="M375 128 L418 180"/>
+        </g>
+        <text x="300" y="240" text-anchor="middle" font-size="9" fill="var(--text-dim)">Mỗi service một Postgres riêng · giao tiếp bất đồng bộ qua RabbitMQ · không gọi DB của nhau</text>
+      </svg><div class="cap">Order Service (chứa Orchestrator) điều phối Inventory &amp; Payment qua RabbitMQ. Mỗi service sở hữu DB riêng — không service nào chạm DB service khác.</div></div>
+      <div class="key"><b>Quyết định:</b> Orchestrator đặt <b>trong</b> Order Service (Order sở hữu vòng đời đơn hàng) thay vì tách service thứ 4 — đơn giản hơn, vẫn học đủ (YAGNI).</div>
+    </div>
+  </div></section>
+
+  <!-- HAPPY -->
+  <section id="happy"><div class="card">
+    <div class="head"><span class="tag">Luồng chính</span><h2><span class="num">3</span> Saga — happy path</h2></div>
+    <div class="body">
+      <div class="diagram"><svg viewBox="0 0 620 220" width="620" height="220" role="img" aria-label="Saga happy path sequence">
+        <defs><marker id="h1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)"/></marker></defs>
+        <g font-size="10" text-anchor="middle" fill="var(--text)">
+          <rect x="30" y="14" width="120" height="26" rx="6" fill="rgba(126,231,135,.1)" stroke="var(--accent)"/><text x="90" y="31">Orchestrator</text>
+          <rect x="250" y="14" width="120" height="26" rx="6" fill="var(--bg-card)" stroke="var(--accent-2)"/><text x="310" y="31">Inventory</text>
+          <rect x="470" y="14" width="120" height="26" rx="6" fill="var(--bg-card)" stroke="var(--accent-2)"/><text x="530" y="31">Payment</text>
+        </g>
+        <g stroke="var(--border)" stroke-dasharray="3"><line x1="90" y1="42" x2="90" y2="210"/><line x1="310" y1="42" x2="310" y2="210"/><line x1="530" y1="42" x2="530" y2="210"/></g>
+        <g font-size="9" fill="var(--text)">
+          <path d="M90 60 L308 60" stroke="var(--accent)" stroke-width="1.4" fill="none" marker-end="url(#h1)"/><text x="195" y="54" text-anchor="middle">① ReserveInventory (saga_id)</text>
+          <path d="M310 80 L92 80" stroke="var(--text-dim)" stroke-width="1.3" fill="none" marker-end="url(#h1)"/><text x="200" y="94" text-anchor="middle" fill="var(--accent-2)">OK (reserved)</text>
+          <path d="M90 120 L528 120" stroke="var(--accent)" stroke-width="1.4" fill="none" marker-end="url(#h1)"/><text x="300" y="114" text-anchor="middle">② ProcessPayment (saga_id)</text>
+          <path d="M530 140 L92 140" stroke="var(--text-dim)" stroke-width="1.3" fill="none" marker-end="url(#h1)"/><text x="300" y="154" text-anchor="middle" fill="var(--accent-2)">OK (charged + ledger)</text>
+          <path d="M90 178 L308 178" stroke="var(--accent)" stroke-width="1.4" fill="none" marker-end="url(#h1)"/><text x="195" y="172" text-anchor="middle">③ CommitReservation</text>
+          <text x="90" y="200" text-anchor="middle" font-size="8.5" fill="var(--accent)">order = CONFIRMED · saga = COMPLETED</text>
+        </g>
+      </svg><div class="cap">Orchestrator gửi từng command (kèm saga_id) &amp; chờ reply trước khi sang bước sau. Mỗi reply OK → tiến; bất kỳ FAIL/timeout → chuyển sang compensation.</div></div>
+      <div class="tbl-scroll"><table>
+        <tr><th>#</th><th>Bước</th><th>Hệ quả</th></tr>
+        <tr><td>0</td><td>Tạo order (local)</td><td>order = <code>PENDING</code>, saga = <code>STARTED</code></td></tr>
+        <tr><td>1</td><td>ReserveInventory → Inventory</td><td>reservation = <code>RESERVED</code></td></tr>
+        <tr><td>2</td><td>ProcessPayment → Payment</td><td>payment = <code>CHARGED</code> + ghi ledger</td></tr>
+        <tr><td>3</td><td>Confirm + CommitReservation</td><td>order = <code>CONFIRMED</code>, saga = <code>COMPLETED</code></td></tr>
+      </table></div>
+    </div>
+  </div></section>
+
+  <!-- COMPENSATION -->
+  <section id="comp"><div class="card">
+    <div class="head"><span class="tag">Xử lý lỗi</span><h2><span class="num">4</span> Compensation (chạy ngược)</h2></div>
+    <div class="body">
+      <div class="diagram"><svg viewBox="0 0 620 170" width="620" height="170" role="img" aria-label="Compensation flow">
+        <defs><marker id="c1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)"/></marker><marker id="c2" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--pink)"/></marker></defs>
+        <g font-size="10" text-anchor="middle" fill="var(--text)">
+          <rect x="20" y="24" width="120" height="34" rx="7" fill="var(--bg-soft)" stroke="var(--accent)"/><text x="80" y="45">1· Reserve ✓</text>
+          <rect x="250" y="24" width="120" height="34" rx="7" fill="rgba(255,123,156,.08)" stroke="var(--pink)"/><text x="310" y="45">2· Payment ✗</text>
+          <rect x="480" y="24" width="120" height="34" rx="7" fill="var(--bg-soft)" stroke="var(--border)"/><text x="540" y="45">3· (không tới)</text>
+        </g>
+        <path d="M140 41 L248 41" stroke="var(--accent)" stroke-width="1.4" fill="none" marker-end="url(#c1)"/>
+        <g font-size="10" text-anchor="middle" fill="var(--text)">
+          <text x="310" y="86" font-weight="700" fill="var(--pink)">Payment lỗi → bù trừ ngược lại:</text>
+          <rect x="20" y="100" width="120" height="34" rx="7" fill="rgba(255,123,156,.08)" stroke="var(--pink)"/><text x="80" y="121">ReleaseInventory</text>
+          <rect x="250" y="100" width="120" height="34" rx="7" fill="rgba(255,123,156,.08)" stroke="var(--pink)"/><text x="310" y="121">order = CANCELLED</text>
+        </g>
+        <path d="M280 58 Q200 80 140 100" stroke="var(--pink)" stroke-width="1.4" fill="none" marker-end="url(#c2)"/>
+        <path d="M140 117 L248 117" stroke="var(--pink)" stroke-width="1.4" fill="none" marker-end="url(#c2)"/>
+        <text x="310" y="158" text-anchor="middle" font-size="8.5" fill="var(--text-dim)">saga = COMPENSATED · mọi compensation phải idempotent &amp; retriable</text>
+      </svg><div class="cap">Khi một bước thất bại, orchestrator chạy hành động bù trừ cho các bước đã thành công, theo thứ tự ngược. Mọi compensation idempotent → retry an toàn.</div></div>
+      <div class="tbl-scroll"><table>
+        <tr><th>Lỗi ở bước</th><th>Hành động bù trừ</th></tr>
+        <tr><td>Reserve (bước 1) FAIL</td><td>Không có gì để bù → order <code>CANCELLED</code>, saga <code>ABORTED</code></td></tr>
+        <tr><td>Payment (bước 2) FAIL</td><td><code>ReleaseInventory</code> → order <code>CANCELLED</code>, saga <code>COMPENSATED</code></td></tr>
+        <tr><td>Confirm (bước 3) FAIL sau khi charged</td><td><code>RefundPayment</code> + <code>ReleaseInventory</code> → <code>CANCELLED</code></td></tr>
+      </table></div>
+      <div class="warnbox"><b>Compensation thất bại?</b> Retry (vì idempotent); nếu vẫn fail → đẩy <b>DLQ + alert</b>. Tuyệt đối không im lặng bỏ qua — đây là tiền.</div>
+    </div>
+  </div></section>
+
+  <!-- STATE -->
+  <section id="state"><div class="card">
+    <div class="head"><span class="tag">State machine</span><h2><span class="num">5</span> Saga state &amp; recovery</h2></div>
+    <div class="body">
+      <div class="diagram"><svg viewBox="0 0 620 150" width="620" height="150" role="img" aria-label="Saga state machine">
+        <defs><marker id="s1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text-dim)"/></marker></defs>
+        <g font-size="9.5" text-anchor="middle" fill="var(--text)">
+          <rect x="14" y="58" width="88" height="34" rx="7" fill="var(--bg-soft)" stroke="var(--border)"/><text x="58" y="79">STARTED</text>
+          <rect x="135" y="58" width="100" height="34" rx="7" fill="var(--bg-soft)" stroke="var(--border)"/><text x="185" y="79">INVENTORY_OK</text>
+          <rect x="270" y="58" width="100" height="34" rx="7" fill="var(--bg-soft)" stroke="var(--border)"/><text x="320" y="79">PAYMENT_OK</text>
+          <rect x="405" y="58" width="100" height="34" rx="7" fill="rgba(126,231,135,.12)" stroke="var(--accent)"/><text x="455" y="79">COMPLETED</text>
+          <rect x="250" y="112" width="140" height="30" rx="7" fill="rgba(255,123,156,.08)" stroke="var(--pink)"/><text x="320" y="131">COMPENSATED / ABORTED</text>
+        </g>
+        <g stroke="var(--text-dim)" stroke-width="1.3" fill="none" marker-end="url(#s1)">
+          <path d="M102 75 L133 75"/><path d="M235 75 L268 75"/><path d="M370 75 L403 75"/>
+          <path d="M185 92 L300 110" stroke="var(--pink)"/><path d="M320 92 L320 110" stroke="var(--pink)"/>
+        </g>
+        <text x="240" y="105" font-size="8" fill="var(--pink)">fail/timeout</text>
+      </svg><div class="cap">Orchestrator persist trạng thái sau mỗi bước vào <code>saga_state</code>. Crash → khởi động lại quét saga chưa terminal để resume/compensate. Mỗi bước có timeout → quá hạn coi như fail.</div></div>
+      <p><b>Bảng <code>saga_state</code>:</b> <code>(saga_id, order_id, current_step, status, last_error, updated_at)</code>. Đây là thứ làm Saga "bền" trước sự cố.</p>
+    </div>
+  </div></section>
+
+  <!-- PATTERNS -->
+  <section id="patterns"><div class="card">
+    <div class="head"><span class="tag">Patterns cốt lõi</span><h2><span class="num">6</span> Idempotency · Outbox · Ledger</h2></div>
+    <div class="body">
+      <h4>6.1 Idempotency — chống double-charge</h4>
+      <div class="diagram"><svg viewBox="0 0 600 120" width="600" height="120" role="img" aria-label="Idempotency">
+        <defs><marker id="i1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text-dim)"/></marker></defs>
+        <g font-size="10" text-anchor="middle" fill="var(--text)">
+          <rect x="20" y="42" width="110" height="36" rx="7" fill="var(--bg-soft)" stroke="var(--accent)"/><text x="75" y="60">Orchestrator</text><text x="75" y="73" font-size="7.5" fill="var(--text-dim)">msg_id = M1</text>
+          <rect x="380" y="36" width="200" height="48" rx="7" fill="var(--bg-soft)" stroke="var(--accent-2)"/><text x="480" y="56">Payment Service</text><text x="480" y="70" font-size="8" fill="var(--text-dim)">processed_messages(M1)?</text>
+        </g>
+        <path d="M130 54 L378 50" stroke="var(--text-dim)" stroke-width="1.3" fill="none" marker-end="url(#i1)"/><text x="250" y="44" font-size="8.5" fill="var(--text)" text-anchor="middle">ProcessPayment (M1)</text>
+        <path d="M130 70 L378 74" stroke="var(--warn)" stroke-width="1.3" fill="none" marker-end="url(#i1)"/><text x="250" y="90" font-size="8.5" fill="var(--warn)" text-anchor="middle">retry cùng M1</text>
+        <text x="480" y="104" font-size="8.5" fill="var(--accent)" text-anchor="middle">M1 đã xử lý → trả kết quả cũ, KHÔNG charge lại</text>
+      </svg><div class="cap">Mỗi command mang msg_id; service ghi vào <code>processed_messages</code> cùng transaction nghiệp vụ. Nhận trùng → trả kết quả cũ. Chống double-charge khi RabbitMQ at-least-once gây trùng.</div></div>
+
+      <h4>6.2 Transactional Outbox — chống dual-write lệch</h4>
+      <div class="diagram"><svg viewBox="0 0 600 130" width="600" height="130" role="img" aria-label="Outbox pattern">
+        <defs><marker id="o1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text-dim)"/></marker></defs>
+        <g font-size="9.5" text-anchor="middle" fill="var(--text)">
+          <rect x="20" y="40" width="150" height="54" rx="8" fill="var(--bg-soft)" stroke="var(--accent-2)"/><text x="95" y="58">Service</text><text x="95" y="74" font-size="8" fill="var(--text-dim)">1 transaction:</text><text x="95" y="86" font-size="8" fill="var(--text-dim)">ghi state + outbox</text>
+          <rect x="240" y="46" width="120" height="40" rx="8" fill="var(--bg-card)" stroke="var(--purple)"/><text x="300" y="64">outbox table</text><text x="300" y="78" font-size="8" fill="var(--text-dim)">(trong cùng DB)</text>
+          <rect x="430" y="46" width="70" height="40" rx="8" fill="var(--bg-card)" stroke="var(--border)"/><text x="465" y="70">Relay</text>
+          <rect x="520" y="46" width="70" height="40" rx="8" fill="rgba(240,180,41,.1)" stroke="var(--warn)"/><text x="555" y="70">Rabbit</text>
+        </g>
+        <g stroke="var(--text-dim)" stroke-width="1.3" fill="none" marker-end="url(#o1)"><path d="M170 67 L238 66"/><path d="M360 66 L428 66"/><path d="M500 66 L518 66"/></g>
+        <text x="300" y="116" text-anchor="middle" font-size="8.5" fill="var(--text-dim)">State &amp; message ghi cùng 1 transaction → relay đọc outbox publish sau → message luôn khớp DB</text>
+      </svg><div class="cap">Thay vì "ghi DB rồi publish" (2 thao tác dễ lệch khi lỗi), ghi state + dòng outbox trong cùng transaction; một relay đọc outbox đẩy lên RabbitMQ. Một nguồn sự thật, không bao giờ lệch.</div></div>
+
+      <h4>6.3 Double-entry Ledger — nguồn sự thật cho tiền</h4>
+      <div class="diagram"><svg viewBox="0 0 600 120" width="600" height="120" role="img" aria-label="Double entry ledger">
+        <g font-size="10" text-anchor="middle" fill="var(--text)">
+          <text x="300" y="16" font-size="10.5" font-weight="700" fill="var(--accent)">Charge 100 cho ván game</text>
+          <rect x="60" y="30" width="220" height="30" rx="6" fill="rgba(255,123,156,.08)" stroke="var(--pink)"/><text x="170" y="50">player:  −100 (debit)</text>
+          <rect x="320" y="30" width="220" height="30" rx="6" fill="rgba(126,231,135,.1)" stroke="var(--accent)"/><text x="430" y="50">house:  +100 (credit)</text>
+          <text x="300" y="80" font-size="9" fill="var(--text-dim)">tổng = 0 ✓ (tiền bảo toàn) · số dư = SUM(entries) · append-only</text>
+        </g>
+        <text x="300" y="106" text-anchor="middle" font-size="8.5" fill="var(--pink)">KHÔNG bao giờ UPDATE balance trực tiếp · tiền dạng integer (cent), không float</text>
+      </svg><div class="cap">Mỗi chuyển động tiền ghi cặp bút toán cân bằng (append-only). Số dư = tổng entries → audit &amp; reconcile được, không mất dấu tiền.</div></div>
+      <div class="key"><b>Ba pattern này là bất biến.</b> Kết hợp at-least-once + idempotency → đạt hiệu ứng <b>effectively exactly-once</b> ở tầng nghiệp vụ.</div>
+    </div>
+  </div></section>
+
+  <!-- MQ -->
+  <section id="mq"><div class="card">
+    <div class="head"><span class="tag">Messaging</span><h2><span class="num">7</span> RabbitMQ topology</h2></div>
+    <div class="body">
+      <div class="diagram"><svg viewBox="0 0 600 175" width="600" height="175" role="img" aria-label="RabbitMQ topology">
+        <defs><marker id="m1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--text-dim)"/></marker></defs>
+        <g font-size="9.5" text-anchor="middle" fill="var(--text)">
+          <rect x="20" y="66" width="110" height="42" rx="8" fill="rgba(126,231,135,.1)" stroke="var(--accent)"/><text x="75" y="84">Orchestrator</text>
+          <rect x="220" y="20" width="150" height="26" rx="6" fill="var(--bg-soft)" stroke="var(--border)"/><text x="295" y="37" font-size="9">inventory.commands</text>
+          <rect x="220" y="62" width="150" height="26" rx="6" fill="var(--bg-soft)" stroke="var(--border)"/><text x="295" y="79" font-size="9">payment.commands</text>
+          <rect x="220" y="118" width="150" height="26" rx="6" fill="var(--bg-soft)" stroke="var(--accent-2)"/><text x="295" y="135" font-size="9">orchestrator.replies</text>
+          <rect x="430" y="20" width="80" height="26" rx="6" fill="var(--bg-card)" stroke="var(--accent-2)"/><text x="470" y="37">Inventory</text>
+          <rect x="430" y="62" width="80" height="26" rx="6" fill="var(--bg-card)" stroke="var(--accent-2)"/><text x="470" y="79">Payment</text>
+          <rect x="430" y="118" width="150" height="40" rx="6" fill="rgba(255,123,156,.06)" stroke="var(--pink)"/><text x="505" y="135">DLQ</text><text x="505" y="149" font-size="8" fill="var(--text-dim)">message fail quá số lần</text>
+        </g>
+        <g stroke="var(--text-dim)" stroke-width="1.3" fill="none" marker-end="url(#m1)">
+          <path d="M130 78 L218 33"/><path d="M130 84 L218 75"/>
+          <path d="M370 33 L428 33"/><path d="M370 75 L428 75"/>
+          <path d="M470 46 L300 60" stroke="var(--accent-2)"/><path d="M470 88 L300 118" stroke="var(--accent-2)"/>
+          <path d="M295 130 L128 96" stroke="var(--accent-2)"/>
+        </g>
+      </svg><div class="cap">Orchestrator publish command vào queue mỗi service; service reply qua <code>orchestrator.replies</code> (correlation = saga_id). Manual ack; message lỗi quá số lần → DLQ.</div></div>
+      <ul>
+        <li><b>Manual ack:</b> consumer chỉ ack sau khi xử lý + ghi DB thành công (crash trước ack → redeliver, idempotency lo phần trùng).</li>
+        <li><b>DLX/DLQ:</b> mỗi queue gắn dead-letter cho message fail quá ngưỡng retry.</li>
+        <li><b>Reply:</b> mỗi command mang <code>reply_to</code> + <code>correlation_id (saga_id)</code>.</li>
+      </ul>
+    </div>
+  </div></section>
+
+  <!-- FAIL -->
+  <section id="fail"><div class="card">
+    <div class="head"><span class="tag">Resilience</span><h2><span class="num">8</span> Failure modes &amp; xử lý</h2></div>
+    <div class="body"><div class="tbl-scroll"><table>
+      <tr><th>Sự cố</th><th>Cơ chế xử lý</th></tr>
+      <tr><td>Message trùng (retry/redeliver)</td><td>Idempotency (<code>processed_messages</code>)</td></tr>
+      <tr><td>Message mất</td><td>Outbox relay + at-least-once + manual ack</td></tr>
+      <tr><td>Orchestrator crash giữa saga</td><td><code>saga_state</code> persisted → resume khi khởi động</td></tr>
+      <tr><td>Downstream không reply</td><td>Timeout bước → compensate</td></tr>
+      <tr><td>Compensation thất bại</td><td>Retry (idempotent) → vẫn fail: DLQ + alert</td></tr>
+      <tr><td>Reservation mồ côi</td><td><code>expires_at</code> (TTL) → job tự release</td></tr>
+      <tr><td>Race trên cùng ví/inventory</td><td>Optimistic locking (version) trong transaction</td></tr>
+      <tr><td>Dual-write lệch</td><td>Transactional outbox</td></tr>
+    </table></div></div>
+  </div></section>
+
+  <!-- TRADE -->
+  <section id="trade"><div class="card">
+    <div class="head"><span class="tag">Quyết định</span><h2><span class="num">9</span> Trade-offs &amp; alternatives</h2></div>
+    <div class="body"><div class="tbl-scroll"><table>
+      <tr><th>Quyết định</th><th>Đã chọn</th><th>Loại bỏ vì</th></tr>
+      <tr><td>Transaction phân tán</td><td><span class="pill ok">Saga</span></td><td>2PC: khoá lâu, coordinator là điểm chết</td></tr>
+      <tr><td>Kiểu Saga</td><td><span class="pill ok">Orchestration</span></td><td>Choreography: khó theo dõi khi mới học (stretch)</td></tr>
+      <tr><td>Broker</td><td><span class="pill ok">RabbitMQ</span></td><td>Kafka: nặng hơn, hợp event-stream hơn command/reply</td></tr>
+      <tr><td>Vị trí orchestrator</td><td><span class="pill ok">Trong Order Service</span></td><td>Service riêng: phức tạp chưa cần (YAGNI)</td></tr>
+      <tr><td>Lưu tiền</td><td><span class="pill ok">Double-entry ledger</span></td><td>Update balance trực tiếp: mất audit, dễ race</td></tr>
+      <tr><td>Multi-master LWW</td><td><span class="pill bad">Tránh</span></td><td>Conflict = mất/sai tiền</td></tr>
+    </table></div></div>
+  </div></section>
+
+  <!-- BEST PRACTICES -->
+  <section id="bp"><div class="card">
+    <div class="head"><span class="tag">Đúc kết</span><h2><span class="num">10</span> Best Practices của dự án</h2><p class="sub">Tổng hợp những điều "phải làm" và "tuyệt đối tránh" — đây là phần áp dụng được cho mọi hệ thống tiền/Saga thực tế.</p></div>
+    <div class="body">
+      <h4>✅ Nên làm</h4>
+      <div class="tbl-scroll"><table>
+        <tr><th>Best practice</th><th>Vì sao</th></tr>
+        <tr><td><b>Double-entry ledger append-only</b> làm nguồn sự thật</td><td>Audit được, reconcile được, không mất dấu tiền</td></tr>
+        <tr><td><b>Idempotency key</b> trên mọi thao tác tiền</td><td>At-least-once + retry/disconnect không gây double-charge</td></tr>
+        <tr><td><b>Transactional outbox</b> để publish event</td><td>Loại bỏ dual-write lệch — message luôn khớp DB</td></tr>
+        <tr><td><b>Persist saga state</b> + timeout mỗi bước</td><td>Crash resume được; treo thì compensate, không kẹt vĩnh viễn</td></tr>
+        <tr><td><b>Compensation idempotent &amp; retriable</b></td><td>Bù trừ lỗi thì retry an toàn; fail mãi → DLQ + alert</td></tr>
+        <tr><td><b>Tiền dạng integer</b> (đơn vị nhỏ nhất)</td><td>Tránh sai số làm tròn của float</td></tr>
+        <tr><td><b>Mỗi service sở hữu DB riêng</b></td><td>Tự chủ, không coupling ngầm; chia sẻ qua API/event</td></tr>
+        <tr><td><b>Manual ack</b> sau khi xử lý + ghi DB</td><td>Crash trước ack → redeliver; idempotency lo phần trùng</td></tr>
+        <tr><td><b>Reconciliation định kỳ</b></td><td>Bắt lệch sớm trước khi thành sự cố lớn</td></tr>
+        <tr><td><b>Server là nguồn quyết định</b> (validate mọi input)</td><td>Không tin số tiền/kết quả do client gửi</td></tr>
+      </table></div>
+      <h4>🚫 Tuyệt đối tránh</h4>
+      <ul>
+        <li><code>UPDATE balance</code> trực tiếp → mất audit, dễ race. Dùng ledger.</li>
+        <li><b>2PC</b> cho microservices → khoá lâu, coordinator là điểm chết.</li>
+        <li><b>Multi-master / LWW</b> trên cùng ví → conflict = mất/sai tiền.</li>
+        <li>Thao tác tiền <b>không idempotent</b> → rớt mạng = trừ/cộng 2 lần.</li>
+        <li><b>Float</b> cho tiền · <b>tin client</b> · bỏ qua reconciliation.</li>
+        <li>Bỏ qua compensation lỗi (im lặng) → tiền treo không ai biết.</li>
+      </ul>
+      <div class="key"><b>Kiến trúc BEST tóm tắt:</b> Saga orchestration (state persisted) + idempotency mọi bước + outbox + double-entry ledger + tiền integer + reconciliation. Đây là khung chuẩn cho mọi hệ thống tiền/đặt hàng phân tán; mở rộng đa region thì thêm <b>home-region per wallet</b> (single-writer), tránh LWW.</div>
+    </div>
+  </div></section>
+
+  <!-- VERIFY -->
+  <section id="verify"><div class="card">
+    <div class="head"><span class="tag">Kiểm chứng</span><h2><span class="num">11</span> Kịch bản verify (ép gãy)</h2></div>
+    <div class="body">
+      <p>Học nhiều nhất ở bước <b>tự ép hệ thống gãy</b> rồi quan sát hành vi:</p>
+      <ol style="margin-left:20px">
+        <li><b>Happy path:</b> order → CONFIRMED, ledger cân bằng.</li>
+        <li><b>Payment fail:</b> bật mock fail → inventory được release, order CANCELLED, không có charge treo.</li>
+        <li><b>Crash giữa saga:</b> kill Order Service sau Reserve → khởi động lại → saga resume/compensate đúng.</li>
+        <li><b>Message trùng:</b> gửi lại cùng ProcessPayment → chỉ charge một lần (kiểm ledger).</li>
+        <li><b>Downstream treo:</b> Payment không reply → timeout → compensate.</li>
+        <li><b>Reconciliation:</b> chạy job → <code>SUM(ledger) == payments</code>, không lệch.</li>
+      </ol>
+      <div class="key"><b>Tài liệu liên quan:</b> spec markdown đầy đủ ở <code>docs/superpowers/specs/2026-06-25-payment-saga-design.md</code>; các khái niệm nền (Saga, Idempotency, Outbox/CDC, Ledger, đa region) ở <code>system-design-roadmap.html</code>.</div>
+    </div>
+  </div></section>
+
+  </main>
+</div></div>
+
+<footer><div class="wrap">
+  Design Doc · Order + Payment qua Saga Orchestration · tài liệu phân tích (không kèm code) · bổ trợ cho System Design Roadmap
+</div></footer>
+
+<script>
+(function(){
+  var THEME='payment-saga-theme';var b=document.getElementById('themeBtn');
+  function ap(t){if(t==='light'){document.documentElement.setAttribute('data-theme','light');b.textContent='☀️ Giao diện sáng';}else{document.documentElement.removeAttribute('data-theme');b.textContent='🌙 Giao diện tối';}}
+  var s=null;try{s=localStorage.getItem(THEME);}catch(e){}ap(s||'dark');
+  b.addEventListener('click',function(){var l=document.documentElement.getAttribute('data-theme')==='light';var n=l?'dark':'light';ap(n);try{localStorage.setItem(THEME,n);}catch(e){}});
+})();
+</script>
+</body>
+</html>
